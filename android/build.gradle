@@ -1,22 +1,12 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
 
-    dependencies {
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.3'
-    }
-}
-
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion '23.0.1'
+    compileSdkVersion 26
 
     defaultConfig {
-        minSdkVersion 8
-        targetSdkVersion 23
+        minSdkVersion 9
+        targetSdkVersion 26
     }
     
     compileOptions {
@@ -30,8 +20,6 @@ android {
         }
     }
 }
-
-apply plugin: 'com.github.dcendents.android-maven'
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
@@ -50,63 +38,7 @@ task javadoc(type: Javadoc) {
     failOnError false
 }
 
-// Javadoc
-task javadocJar (type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
+apply from: "${rootProject.projectDir}/gradle/license.gradle"
+license.excludes(["**/*.xml", "**/BuildConfig.java", "**/R.java"])
 
-// Sources
-task sourcesJar (type : Jar) {
-    classifier = 'sources'
-    from android.sourceSets.main.java.srcDirs
-}
-
-// Thanks to http://stackoverflow.com/questions/19307341/android-library-gradle-release-jar
-android.libraryVariants.all { variant ->
-    def name = variant.buildType.name
-    if (name.equals(com.android.builder.core.BuilderConstants.DEBUG)) {
-        return; // Skip debug builds.
-    }
-    def task = project.tasks.create "jar${name.capitalize()}", Jar
-    task.dependsOn variant.javaCompile
-    task.from variant.javaCompile.destinationDir
-    artifacts.add('archives', task);
-}
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
-}
-
-eclipse {
-    sourceSets {
-        main {
-            java.srcDirs 'src/main/java', 'gen'
-        }
-    }
-
-    jdt {
-        sourceCompatibility = 1.6
-        targetCompatibility = 1.6
-    }
-
-    classpath {
-        plusConfigurations += [ project.configurations.compile ]        
-        containers 'org.eclipse.andmore.ANDROID_FRAMEWORK', 'org.eclipse.andmore.LIBRARIES'       
-    }
-
-    project {
-        natures 'org.eclipse.andmore.AndroidNature'
-        buildCommands.clear();
-        buildCommand "org.eclipse.andmore.PreCompilerBuilder"
-        buildCommand "org.eclipse.jdt.core.javabuilder"
-        buildCommand "org.eclipse.andmore.ApkBuilder"
-    }
-}
-
-apply from: '../license.gradle'
-license.excludes(["**/*.xml", "**/BuildConfig.java"])
-
-apply from: '../publish.gradle'
-bintray.configurations = ['archives']
+apply from: "${rootProject.projectDir}/gradle/publish-module.gradle"

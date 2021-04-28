@@ -11,14 +11,6 @@ This library allows you to asynchronously browse files with the _native_ file ch
 Add the pretty **bold** parts into your _build.gradle_ file:
 
 <pre>
-    repositories {
-        maven {
-            <b>url "http://dl.bintray.com/spookygames/oss"</b>
-        }
-    }
-    
-    ...
-    
     project(":desktop") {
         
         ...
@@ -26,7 +18,7 @@ Add the pretty **bold** parts into your _build.gradle_ file:
         dependencies {
             compile project(":core")
             ...
-            <b>compile "net.spookygames.gdx:gdx-nativefilechooser-desktop:1.0.0"</b>
+            <b>compile "games.spooky.gdx:gdx-nativefilechooser-desktop:1.0.0"</b>
         }
     }
     
@@ -37,7 +29,7 @@ Add the pretty **bold** parts into your _build.gradle_ file:
         dependencies {
             compile project(":core")
             ...
-            <b>compile "net.spookygames.gdx:gdx-nativefilechooser-android:1.0.0"</b>
+            <b>compile "games.spooky.gdx:gdx-nativefilechooser-android:1.0.0"</b>
         }
     }
     
@@ -47,7 +39,7 @@ Add the pretty **bold** parts into your _build.gradle_ file:
         
         dependencies {
             ...
-            <b>compile "net.spookygames.gdx:gdx-nativefilechooser:1.0.0"</b>
+            <b>compile "games.spooky.gdx:gdx-nativefilechooser:1.0.0"</b>
         }
     }
 </pre>
