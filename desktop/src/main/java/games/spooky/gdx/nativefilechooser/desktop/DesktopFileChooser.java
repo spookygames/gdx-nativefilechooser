@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package net.spookygames.gdx.nativefilechooser.desktop;
+package games.spooky.gdx.nativefilechooser.desktop;
 
 import java.awt.FileDialog;
 import java.awt.Frame;
@@ -33,10 +33,10 @@ import java.util.regex.Pattern;
 
 import com.badlogic.gdx.files.FileHandle;
 
-import net.spookygames.gdx.nativefilechooser.NativeFileChooser;
-import net.spookygames.gdx.nativefilechooser.NativeFileChooserCallback;
-import net.spookygames.gdx.nativefilechooser.NativeFileChooserConfiguration;
-import net.spookygames.gdx.nativefilechooser.NativeFileChooserUtils;
+import games.spooky.gdx.nativefilechooser.NativeFileChooser;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserCallback;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserConfiguration;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserUtils;
 
 /**
  * Implementation of a {@link NativeFileChooser} for the Desktop backend of a

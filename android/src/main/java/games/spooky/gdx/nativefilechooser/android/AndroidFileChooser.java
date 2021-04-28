@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package net.spookygames.gdx.nativefilechooser.android;
+package games.spooky.gdx.nativefilechooser.android;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -41,10 +41,10 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
-import net.spookygames.gdx.nativefilechooser.NativeFileChooser;
-import net.spookygames.gdx.nativefilechooser.NativeFileChooserCallback;
-import net.spookygames.gdx.nativefilechooser.NativeFileChooserConfiguration;
-import net.spookygames.gdx.nativefilechooser.NativeFileChooserUtils;
+import games.spooky.gdx.nativefilechooser.NativeFileChooser;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserCallback;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserConfiguration;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserUtils;
 
 /**
  * Implementation of a {@link NativeFileChooser} for the Android backend of a

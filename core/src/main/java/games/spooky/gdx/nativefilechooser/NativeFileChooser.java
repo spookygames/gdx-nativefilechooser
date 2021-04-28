@@ -21,21 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package net.spookygames.gdx.nativefilechooser;
-
-import java.io.IOException;
-
-import com.badlogic.gdx.files.FileHandle;
+package games.spooky.gdx.nativefilechooser;
 
 /**
  * The {@code NativeFileChooser} interface. Put this one into your core project,
- * let it sink through via the initializer in your platform-specific projects
- * and start rolling!
+ * let it sink through via the initialization code in your platform-specific
+ * projects and start rolling!
  * 
+ * <p>
  * Be careful, not every parameter of a {@link NativeFileChooserConfiguration}
  * may be functional for every implementation of {@code NativeFileChooser}.
  * 
- * @see NativeFileChooser#chooseFile(NativeFileChooserConfiguration, NativeFileChooserCallback)
+ * @see #chooseFile(NativeFileChooserConfiguration, NativeFileChooserCallback)
  * 
  * @see NativeFileChooserConfiguration
  * @see NativeFileChooserCallback
@@ -43,43 +40,29 @@ import com.badlogic.gdx.files.FileHandle;
  * @author thorthur
  * 
  */
-public interface NativeFileChooserCallback {
+public interface NativeFileChooser {
 
 	/**
-	 * Handle the user-chosen {@link FileHandle}.
+	 * Launch a native UI in order to find a file and let you handle the result.
+	 * This operation is asynchronous. All configuration is carried out through
+	 * a non-null {@link NativeFileChooserConfiguration} object. Once the
+	 * asynchronous operation ends (ie. a file is selected, or the operation is
+	 * cancelled, or an error occurs), a proper method on the callback is
+	 * called. See {@link NativeFileChooserCallback} for more.
 	 * 
-	 * @param file
-	 *            FileHandle chosen by user
+	 * <p>
+	 * Be careful, not every parameter of a
+	 * {@link NativeFileChooserConfiguration} may be functional for every
+	 * implementation of {@link NativeFileChooser}.
+	 * 
+	 * @see NativeFileChooserConfiguration
+	 * @see NativeFileChooserCallback
+	 * 
+	 * @param configuration
+	 *            File choosing configuration, must not be null
+	 * @param callback
+	 *            File choosing asynchronous callback, must not be null
 	 */
-	void onFileChosen(FileHandle file);
-
-	/**
-	 * Handle cancellation from the user.
-	 * 
-	 * In this case, {@link #onFileChosen(FileHandle)} will not be called.
-	 */
-	void onCancellation();
-
-	/**
-	 * Handle exception throw during file choosing.
-	 * 
-	 * On Android you should be prepared to handle:
-	 * <ul>
-	 * <li>
-	 * {@link IOException} if an error occurred while copying chosen resource to
-	 * a temporary {@link FileHandle}.
-	 * </li>
-	 * <li>
-	 * {@code ActivityNotFoundException} if no file manager could be found on
-	 * the device.
-	 * </li>
-	 * </ul>
-	 * 
-	 * In this case, {@link #onFileChosen(FileHandle)} will not be called.
-	 * 
-	 * @param exception
-	 *            Exception throw during file choosing
-	 */
-	void onError(Exception exception);
+	void chooseFile(NativeFileChooserConfiguration configuration, NativeFileChooserCallback callback);
 
 }
