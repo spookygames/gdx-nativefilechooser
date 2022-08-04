@@ -2,18 +2,18 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 32
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion 26
+        targetSdkVersion 32
     }
-    
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_6
         targetCompatibility JavaVersion.VERSION_1_6
     }
-    
+
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -27,8 +27,8 @@ targetCompatibility = 1.6
 project.archivesBaseName = "$libName-${project.name}"
 
 dependencies {
-    compile project(':core')
-    compile "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
+    api project(':core')
+    api "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
 }
 
 task javadoc(type: Javadoc) {
