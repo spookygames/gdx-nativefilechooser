@@ -66,7 +66,7 @@ public class DesktopFileChooser implements NativeFileChooser {
 		PointerBuffer path = memAllocPointer(1);
 
 		try {
-			int result = NativeFileDialog.NFD_OpenDialog(filterList, configuration.directory.path(), path);
+			int result = NativeFileDialog.NFD_OpenDialog(filterList, configuration.directory.file().getPath(), path);
 
 			switch (result) {
 				case NativeFileDialog.NFD_OKAY:
