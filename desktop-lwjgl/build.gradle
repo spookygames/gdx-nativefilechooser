@@ -10,14 +10,14 @@ project.ext.lwjglVersion = "3.3.1"
 
 dependencies {
     api project(':core')
-    api "org.lwjgl:lwjgl-nfd:${versions.lwjgl3}"
-    api "org.lwjgl:lwjgl-nfd:${versions.lwjgl3}:natives-linux"
-    api "org.lwjgl:lwjgl-nfd:${versions.lwjgl3}:natives-linux-arm32"
-    api "org.lwjgl:lwjgl-nfd:${versions.lwjgl3}:natives-linux-arm64"
-    api "org.lwjgl:lwjgl-nfd:${versions.lwjgl3}:natives-macos"
-    api "org.lwjgl:lwjgl-nfd:${versions.lwjgl3}:natives-macos-arm64"
-    api "org.lwjgl:lwjgl-nfd:${versions.lwjgl3}:natives-windows"
-    api "org.lwjgl:lwjgl-nfd:${versions.lwjgl3}:natives-windows-x86"
+    api "org.lwjgl:lwjgl-nfd:${lwjglVersion}"
+    api "org.lwjgl:lwjgl-nfd:${lwjglVersion}:natives-linux"
+    api "org.lwjgl:lwjgl-nfd:${lwjglVersion}:natives-linux-arm32"
+    api "org.lwjgl:lwjgl-nfd:${lwjglVersion}:natives-linux-arm64"
+    api "org.lwjgl:lwjgl-nfd:${lwjglVersion}:natives-macos"
+    api "org.lwjgl:lwjgl-nfd:${lwjglVersion}:natives-macos-arm64"
+    api "org.lwjgl:lwjgl-nfd:${lwjglVersion}:natives-windows"
+    api "org.lwjgl:lwjgl-nfd:${lwjglVersion}:natives-windows-x86"
     api "org.apache.tika:tika-core:2.4.1"
 }
 
