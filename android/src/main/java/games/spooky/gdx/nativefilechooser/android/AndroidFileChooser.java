@@ -153,7 +153,7 @@ public class AndroidFileChooser implements NativeFileChooser {
 					break;
 				case Activity.RESULT_OK:
 					try {
-						FileHandle file = null;
+						FileHandle file;
 
 						// Get the Uri of the selected file
 						Uri uri = data.getData();

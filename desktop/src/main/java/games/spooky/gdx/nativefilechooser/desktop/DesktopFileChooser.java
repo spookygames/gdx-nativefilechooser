@@ -112,10 +112,7 @@ public class DesktopFileChooser implements NativeFileChooser {
 		if (files == null || files.length == 0) {
 			callback.onCancellation();
 		} else {
-			FileHandle result = null;
-			File f = files[0];
-			result = new FileHandle(f);
-			callback.onFileChosen(result);
+			callback.onFileChosen(new FileHandle(files[0]));
 		}
 
 	}
@@ -123,19 +120,13 @@ public class DesktopFileChooser implements NativeFileChooser {
 	static FilenameFilter createMimeTypeFilter(final String mimeType) {
 		return new FilenameFilter() {
 
-			Pattern mimePattern = Pattern.compile(mimeType.replaceAll("/", "\\\\/").replace("*", ".*"));
+			final Pattern mimePattern = Pattern.compile(mimeType.replaceAll("/", "\\\\/").replace("*", ".*"));
 
 			@Override
 			public boolean accept(File dir, String name) {
 
 				// Getting a Mime type is not warranted (and may be slow!)
 				try {
-
-					// Java6
-					// FileNameMap map = URLConnection.getFileNameMap();
-					// String path = new File(dir, name).getAbsolutePath();
-					// String mime = map.getContentTypeFor(path);
-
 					// Java7
 					String mime = Files.probeContentType(new File(dir, name).toPath());
 
@@ -145,7 +136,7 @@ public class DesktopFileChooser implements NativeFileChooser {
 						return mimePattern.matcher(mime).matches();
 					}
 
-				} catch (IOException e) {
+				} catch (IOException ignored) {
 				}
 
 				// Accept by default, in case mime probing doesn't work
