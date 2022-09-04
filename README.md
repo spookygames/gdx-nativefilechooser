@@ -18,7 +18,7 @@ Add the pretty **bold** parts into your _build.gradle_ file:
         dependencies {
             compile project(":core")
             ...
-            <b>compile "games.spooky.gdx:gdx-nativefilechooser-desktop:1.0.0"</b>
+            <b>compile "games.spooky.gdx:gdx-nativefilechooser-desktop-lwjgl:2.1.0"</b>
         }
     }
     
@@ -29,7 +29,7 @@ Add the pretty **bold** parts into your _build.gradle_ file:
         dependencies {
             compile project(":core")
             ...
-            <b>compile "games.spooky.gdx:gdx-nativefilechooser-android:1.0.0"</b>
+            <b>compile "games.spooky.gdx:gdx-nativefilechooser-android:2.1.0"</b>
         }
     }
     
@@ -39,7 +39,7 @@ Add the pretty **bold** parts into your _build.gradle_ file:
         
         dependencies {
             ...
-            <b>compile "games.spooky.gdx:gdx-nativefilechooser:1.0.0"</b>
+            <b>compile "games.spooky.gdx:gdx-nativefilechooser:2.1.0"</b>
         }
     }
 </pre>
@@ -127,11 +127,7 @@ On Android, it gives:
 
 ## Platform support
 
-- [x] Desktop (awt)
+- [x] Desktop (awt/swing/lwjgl)
 - [x] Android
 - [ ] iOS
 - [ ] HTML
-
-> Moar 2 com plz?
-
-> Nope.
