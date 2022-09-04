@@ -19,7 +19,7 @@ allprojects {
     version = '2.0.0'
 
     ext {
-        gdxVersion = '1.5.5'
+        gdxVersion = '1.8.0'
         libName = 'gdx-nativefilechooser'
     }
 
