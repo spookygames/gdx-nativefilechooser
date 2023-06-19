@@ -21,26 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package games.spooky.gdx.nativefilechooser;
+package games.spooky.gdx.nativefilechooser.demo;
 
-/**
- * Some run-of-the-mill utility methods for {@link NativeFileChooser} implementations.
- * 
- * @author thorthur
- *
- */
-public class NativeFileChooserUtils {
+import android.os.Bundle;
+import com.badlogic.gdx.backends.android.AndroidApplication;
+import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
+import games.spooky.gdx.nativefilechooser.android.AndroidFileChooser;
 
-	private NativeFileChooserUtils() {
-	}
+public class GdxNativeFileChooserDemoAndroid extends AndroidApplication {
 
-	/*
-	 * I may have preferred the use of an InvalidArgumentException, but let's
-	 * stick to standards here.
-	 * (http://stackoverflow.com/questions/3881/illegalargumentexception-or-nullpointerexception-for-a-null-parameter)
-	 */
-	public static void checkNotNull(Object argument, String argumentName) {
-		if (argument == null)
-			throw new NullPointerException("Given argument \"" + argumentName + "\" must not be null");
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
+		config.useAccelerometer = false;
+		config.useCompass = false;
+		config.useWakelock = true;
+
+		initialize(new GdxNativeFileChooserDemo(new AndroidFileChooser(this)), config);
 	}
 }

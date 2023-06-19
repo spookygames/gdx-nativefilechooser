@@ -21,26 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package games.spooky.gdx.nativefilechooser;
+package games.spooky.gdx.nativefilechooser.demo;
 
-/**
- * Some run-of-the-mill utility methods for {@link NativeFileChooser} implementations.
- * 
- * @author thorthur
- *
- */
-public class NativeFileChooserUtils {
+import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
+import games.spooky.gdx.nativefilechooser.desktop.DesktopFileChooser;
 
-	private NativeFileChooserUtils() {
-	}
-
-	/*
-	 * I may have preferred the use of an InvalidArgumentException, but let's
-	 * stick to standards here.
-	 * (http://stackoverflow.com/questions/3881/illegalargumentexception-or-nullpointerexception-for-a-null-parameter)
-	 */
-	public static void checkNotNull(Object argument, String argumentName) {
-		if (argument == null)
-			throw new NullPointerException("Given argument \"" + argumentName + "\" must not be null");
+public class GdxNativeFileChooserDemoDesktop {
+	public static void main(String[] args) {
+		new LwjglApplication(new GdxNativeFileChooserDemo(new DesktopFileChooser()), "gdx-nativefilechooser demo", 1200, 800);
 	}
 }

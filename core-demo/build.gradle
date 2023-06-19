@@ -1,0 +1,15 @@
+
+apply plugin: 'java-library'
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+dependencies {
+    api project(':core')
+}
+
+archivesBaseName = "$libName-${project.name}"
+
+license.includes(["**/*.java"])

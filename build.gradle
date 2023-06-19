@@ -21,6 +21,7 @@ allprojects {
     ext {
         gdxVersion = '1.8.0'
         libName = 'gdx-nativefilechooser'
+        gdxVersionDemo = '1.10.0'
     }
 
     repositories {

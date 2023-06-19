@@ -1,0 +1,121 @@
+
+buildscript {
+    repositories {
+        mavenCentral()
+        google()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.0.4'
+    }
+}
+
+apply plugin: 'com.android.application'
+
+configurations { natives }
+
+dependencies {
+    implementation project(':core-demo')
+    implementation project(':android')
+    implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersionDemo"
+
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersionDemo:natives-armeabi-v7a"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersionDemo:natives-arm64-v8a"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersionDemo:natives-x86"
+    natives "com.badlogicgames.gdx:gdx-platform:$gdxVersionDemo:natives-x86_64"
+}
+
+android {
+    compileSdk 33
+    buildToolsVersion = '30.0.3'
+
+    defaultConfig {
+        applicationId "games.spooky.gdx.nativefilechooser"
+        minSdkVersion 14
+        targetSdkVersion 33
+    }
+    
+    compileOptions {
+        sourceCompatibility = 1.6
+        targetCompatibility = 1.6
+    }
+    
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+}
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+// Called every time gradle gets executed, takes the native dependencies of
+// the natives configuration, and extracts them to the proper libs/ folders
+// so they get packed with the APK.
+task copyAndroidNatives() {
+    doFirst {
+        file("libs/armeabi-v7a/").mkdirs()
+        file("libs/arm64-v8a/").mkdirs()
+        file("libs/x86_64/").mkdirs()
+        file("libs/x86/").mkdirs()
+
+        configurations.getByName("natives").copy().files.each { jar ->
+            def outputDir = null
+            if(jar.name.endsWith("natives-armeabi-v7a.jar")) outputDir = file("libs/armeabi-v7a")
+            if(jar.name.endsWith("natives-arm64-v8a.jar")) outputDir = file("libs/arm64-v8a")
+            if(jar.name.endsWith("natives-x86_64.jar")) outputDir = file("libs/x86_64")
+            if(jar.name.endsWith("natives-x86.jar")) outputDir = file("libs/x86")
+            if(outputDir != null) {
+                copy {
+                    from zipTree(jar)
+                    into outputDir
+                    include "*.so"
+                }
+            }
+        }
+    }
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name.contains("package") || task.name.contains("Release")) {
+        task.dependsOn 'copyAndroidNatives'
+    }
+}
+
+def adb
+
+task defineAdbPath {
+    def path
+    def localProperties = project.file("../local.properties")
+    if (localProperties.exists()) {
+        Properties properties = new Properties()
+        localProperties.withInputStream { instr -> properties.load(instr) }
+        def sdkDir = properties.getProperty('sdk.dir')
+        if (sdkDir) {
+            path = sdkDir
+        } else {
+            path = "$System.env.ANDROID_HOME"
+        }
+    } else {
+        path = "$System.env.ANDROID_HOME"
+    }
+    adb = path + "/platform-tools/adb"
+}
+
+task run(type: Exec, dependsOn: defineAdbPath) {
+    commandLine "$adb", 'shell', 'am', 'start', '-n', 'games.spooky.gdx.nativefilechooser.demo/games.spooky.gdx.nativefilechooser.demo.GdxNativeFileChooserDemoAndroid'
+    
+    doLast{
+        if (executionResult.exitValue != 0) {
+            logger.error("It probably failed!")
+        }
+    }
+}
+
+license.excludes(["**/*.xml", "**/BuildConfig.java"])
