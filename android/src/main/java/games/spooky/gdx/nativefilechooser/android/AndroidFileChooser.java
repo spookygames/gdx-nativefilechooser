@@ -23,28 +23,21 @@
  */
 package games.spooky.gdx.nativefilechooser.android;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.util.Locale;
-
-import com.badlogic.gdx.backends.android.AndroidApplication;
-import com.badlogic.gdx.backends.android.AndroidEventListener;
-import com.badlogic.gdx.files.FileHandle;
-
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
-import games.spooky.gdx.nativefilechooser.NativeFileChooser;
-import games.spooky.gdx.nativefilechooser.NativeFileChooserCallback;
-import games.spooky.gdx.nativefilechooser.NativeFileChooserConfiguration;
-import games.spooky.gdx.nativefilechooser.NativeFileChooserUtils;
+import com.badlogic.gdx.backends.android.AndroidApplication;
+import com.badlogic.gdx.backends.android.AndroidEventListener;
+import com.badlogic.gdx.files.FileHandle;
+import games.spooky.gdx.nativefilechooser.*;
+
+import java.io.*;
+import java.net.MalformedURLException;
+
+import static android.content.Intent.normalizeMimeType;
 
 /**
  * Implementation of a {@link NativeFileChooser} for the Android backend of a
@@ -92,14 +85,13 @@ public class AndroidFileChooser implements NativeFileChooser {
 	 * NativeFileChooserCallback)
 	 */
 	@Override
-	public void chooseFile(NativeFileChooserConfiguration configuration, final NativeFileChooserCallback callback) {
+	public void chooseFile(final NativeFileChooserConfiguration configuration, final NativeFileChooserCallback callback) {
 
 		NativeFileChooserUtils.checkNotNull(configuration, "configuration");
 		NativeFileChooserUtils.checkNotNull(callback, "callback");
 
 		// Create target Intent for new Activity
-		Intent intent = new Intent();
-		intent.setAction(Intent.ACTION_GET_CONTENT);
+		Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 
 		intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
@@ -144,37 +136,39 @@ public class AndroidFileChooser implements NativeFileChooser {
 			@Override
 			public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-				// Don't interfere with other activity results
-				if (requestCode != IntentCode)
-					return;
+				try {
+					// Don't interfere with other activity results
+					if (requestCode != IntentCode)
+						return;
 
-				switch (resultCode) {
-				case Activity.RESULT_CANCELED:
-					// Action got cancelled
-					callback.onCancellation();
-					break;
-				case Activity.RESULT_OK:
-					try {
-						FileHandle file;
+					switch (resultCode) {
+						case Activity.RESULT_CANCELED:
+							// Action got cancelled
+							callback.onCancellation();
+							break;
+						case Activity.RESULT_OK:
+							try {
+								FileHandle file;
 
-						// Get the Uri of the selected file
-						Uri uri = data.getData();
+								// Get the Uri of the selected file
+								Uri uri = data.getData();
 
-						// Try to build file from it
-						file = fileHandleFromUri(uri);
+								// Try to build file from it
+								file = fileHandleFromUri(uri);
 
-						// Call success callback
-						callback.onFileChosen(file);
-					} catch (IOException ex) {
-						callback.onError(ex);
+								// Call success callback
+								callback.onFileChosen(file);
+							} catch (IOException ex) {
+								callback.onError(ex);
+							}
+							break;
+						default:
+							break;
 					}
-					break;
-				default:
-					break;
+				} finally {
+					// Self deregistration
+					app.removeAndroidEventListener(this);
 				}
-
-				// Self deregistration
-				app.removeAndroidEventListener(this);
 			}
 		});
 
@@ -232,47 +226,6 @@ public class AndroidFileChooser implements NativeFileChooser {
 		byte[] buffer = new byte[2048];
 		for (int n = in.read(buffer); n >= 0; n = in.read(buffer))
 			out.write(buffer, 0, n);
-	}
-
-	/**
-	 * Disclaimer: Taken directly from Android sources. I'd better have outdated
-	 * code than API level fumbles here.
-	 * 
-	 * <p>
-	 * Normalize a MIME data type.
-	 *
-	 * <p>
-	 * A normalized MIME type has white-space trimmed, content-type parameters
-	 * removed, and is lower-case. This aligns the type with Android best
-	 * practices for intent filtering.
-	 *
-	 * <p>
-	 * For example, "text/plain; charset=utf-8" becomes "text/plain".
-	 * "text/x-vCard" becomes "text/x-vcard".
-	 *
-	 * <p>
-	 * All MIME types received from outside Android (such as user input, or
-	 * external sources like Bluetooth, NFC, or the Internet) should be
-	 * normalized before they are used to create an Intent.
-	 *
-	 * @param type
-	 *            MIME data type to normalize
-	 * @return normalized MIME data type, or null if the input was null
-	 * @see Intent#setType
-	 * @see Intent#setTypeAndNormalize
-	 */
-	private static String normalizeMimeType(String type) {
-		if (type == null) {
-			return null;
-		}
-
-		type = type.trim().toLowerCase(Locale.ROOT);
-
-		final int semicolonIndex = type.indexOf(';');
-		if (semicolonIndex != -1) {
-			type = type.substring(0, semicolonIndex);
-		}
-		return type;
 	}
 
 }
