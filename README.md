@@ -16,9 +16,9 @@ Add the pretty **bold** parts into your _build.gradle_ file:
         dependencies {
             compile project(":core")
             ...
-            <b>compile "games.spooky.gdx:gdx-nativefilechooser-desktop:2.1.0"</b>
+            <b>compile "games.spooky.gdx:gdx-nativefilechooser-desktop:2.2.0"</b>
             or
-            <b>compile "games.spooky.gdx:gdx-nativefilechooser-desktop-lwjgl:2.1.0"</b>
+            <b>compile "games.spooky.gdx:gdx-nativefilechooser-desktop-lwjgl:2.2.0"</b>
         }
     }
     
@@ -29,7 +29,7 @@ Add the pretty **bold** parts into your _build.gradle_ file:
         dependencies {
             compile project(":core")
             ...
-            <b>compile "games.spooky.gdx:gdx-nativefilechooser-android:2.1.0"</b>
+            <b>compile "games.spooky.gdx:gdx-nativefilechooser-android:2.2.0"</b>
         }
     }
     
@@ -39,7 +39,7 @@ Add the pretty **bold** parts into your _build.gradle_ file:
         
         dependencies {
             ...
-            <b>compile "games.spooky.gdx:gdx-nativefilechooser:2.1.0"</b>
+            <b>compile "games.spooky.gdx:gdx-nativefilechooser:2.2.0"</b>
         }
     }
 </pre>
