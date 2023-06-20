@@ -16,8 +16,9 @@ dependencies {
 archivesBaseName = "$libName-${project.name}"
 
 jar {
-    from files(sourceSets.main.output.classesDirs)
-    from {configurations.compile.collect {zipTree(it)}}
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    dependsOn configurations.runtimeClasspath
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
 
     manifest {
         attributes 'Main-Class': "games.spooky.gdx.nativefilechooser.demo.GdxNativeFileChooserDemoDesktop"
