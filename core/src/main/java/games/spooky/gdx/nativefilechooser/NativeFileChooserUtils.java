@@ -29,7 +29,7 @@ package games.spooky.gdx.nativefilechooser;
  * @author thorthur
  *
  */
-public class NativeFileChooserUtils {
+public final class NativeFileChooserUtils {
 
 	private NativeFileChooserUtils() {
 	}

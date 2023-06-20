@@ -23,18 +23,13 @@
  */
 package games.spooky.gdx.nativefilechooser.desktop;
 
+import com.badlogic.gdx.files.FileHandle;
+import games.spooky.gdx.nativefilechooser.*;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import java.io.File;
 import java.io.FilenameFilter;
-
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
-
-import com.badlogic.gdx.files.FileHandle;
-
-import games.spooky.gdx.nativefilechooser.NativeFileChooser;
-import games.spooky.gdx.nativefilechooser.NativeFileChooserCallback;
-import games.spooky.gdx.nativefilechooser.NativeFileChooserConfiguration;
-import games.spooky.gdx.nativefilechooser.NativeFileChooserUtils;
 
 /**
  * Implementation of a {@link NativeFileChooser} for the Desktop backend of a
@@ -76,27 +71,7 @@ public class SwingFileChooser implements NativeFileChooser {
 		if (title != null)
 			fileChooser.setDialogTitle(title);
 
-		FilenameFilter filter = null;
-
-		// Add MIME type filter if any
-		if (configuration.mimeFilter != null)
-			filter = DesktopFileChooser.createMimeTypeFilter(configuration.mimeFilter);
-
-		// Add name filter if any
-		if (configuration.nameFilter != null) {
-			if (filter == null) {
-				filter = configuration.nameFilter;
-			} else {
-				// Combine filters!
-				final FilenameFilter mime = filter;
-				filter = new FilenameFilter() {
-					@Override
-					public boolean accept(File dir, String name) {
-						return mime.accept(dir, name) && configuration.nameFilter.accept(dir, name);
-					}
-				};
-			}
-		}
+		FilenameFilter filter = DesktopFileChooser.createFilenameFilter(configuration);
 
 		if (filter != null) {
 			final FilenameFilter finalFilter = filter;
@@ -107,7 +82,7 @@ public class SwingFileChooser implements NativeFileChooser {
 				
 				@Override
 				public boolean accept(File f) {
-					return finalFilter.accept(f.getParentFile(), f.getName());
+					return f.isDirectory() || finalFilter.accept(f.getParentFile(), f.getName());
 				}
 			});
 			fileChooser.setAcceptAllFileFilterUsed(false);

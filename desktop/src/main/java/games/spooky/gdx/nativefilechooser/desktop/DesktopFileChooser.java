@@ -77,25 +77,7 @@ public class DesktopFileChooser implements NativeFileChooser {
 
 		FilenameFilter filter = null;
 
-		// Add MIME type filter if any
-		if (configuration.mimeFilter != null)
-			filter = createMimeTypeFilter(configuration.mimeFilter);
-
-		// Add name filter if any
-		if (configuration.nameFilter != null) {
-			if (filter == null) {
-				filter = configuration.nameFilter;
-			} else {
-				// Combine filters!
-				final FilenameFilter mime = filter;
-				filter = new FilenameFilter() {
-					@Override
-					public boolean accept(File dir, String name) {
-						return mime.accept(dir, name) && configuration.nameFilter.accept(dir, name);
-					}
-				};
-			}
-		}
+		FilenameFilter filter = createFilenameFilter(configuration);
 
 		if (filter != null)
 			fileDialog.setFilenameFilter(filter);
@@ -117,7 +99,32 @@ public class DesktopFileChooser implements NativeFileChooser {
 
 	}
 
-	static FilenameFilter createMimeTypeFilter(final String mimeType) {
+	static FilenameFilter createFilenameFilter(final NativeFileChooserConfiguration configuration) {
+		FilenameFilter filter = null;
+
+		// Add MIME type filter if any
+		if (configuration.mimeFilter != null)
+			filter = DesktopFileChooser.createMimeTypeFilter(configuration.mimeFilter);
+
+		// Add name filter if any
+		if (configuration.nameFilter != null) {
+			if (filter == null) {
+				filter = configuration.nameFilter;
+			} else {
+				// Combine filters!
+				final FilenameFilter mime = filter;
+				filter = new FilenameFilter() {
+					@Override
+					public boolean accept(File dir, String name) {
+						return mime.accept(dir, name) && configuration.nameFilter.accept(dir, name);
+					}
+				};
+			}
+		}
+		return filter;
+	}
+
+	private static FilenameFilter createMimeTypeFilter(final String mimeType) {
 		return new FilenameFilter() {
 
 			final Pattern mimePattern = Pattern.compile(mimeType.replaceAll("/", "\\\\/").replace("*", ".*"));
