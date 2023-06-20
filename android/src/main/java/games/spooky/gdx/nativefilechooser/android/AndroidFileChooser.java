@@ -101,6 +101,8 @@ public class AndroidFileChooser implements NativeFileChooser {
 		Intent intent = new Intent();
 		intent.setAction(Intent.ACTION_GET_CONTENT);
 
+		intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
 		// This one will ensure we have access to the
 		// MediaStore.MediaColumns.DISPLAY_NAME property
 		intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -111,7 +113,7 @@ public class AndroidFileChooser implements NativeFileChooser {
 
 		if (configuration.directory != null) {
 			try {
-				data = Uri.parse(configuration.directory.file().toURI().toURL().toString());
+				data = Uri.parse(configuration.directory.file().toURI().toURL().toString().replaceFirst("file:", "content:"));
 			} catch (MalformedURLException ex) {
 				app.error(getClass().getSimpleName(), "Invalid starting directory", ex);
 			}
