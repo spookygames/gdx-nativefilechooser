@@ -24,10 +24,7 @@
 package games.spooky.gdx.nativefilechooser.desktop;
 
 import com.badlogic.gdx.files.FileHandle;
-import games.spooky.gdx.nativefilechooser.NativeFileChooser;
-import games.spooky.gdx.nativefilechooser.NativeFileChooserCallback;
-import games.spooky.gdx.nativefilechooser.NativeFileChooserConfiguration;
-import games.spooky.gdx.nativefilechooser.NativeFileChooserUtils;
+import games.spooky.gdx.nativefilechooser.*;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
@@ -66,7 +63,9 @@ public class DesktopFileChooser implements NativeFileChooser {
 		PointerBuffer path = memAllocPointer(1);
 
 		try {
-			int result = NativeFileDialog.NFD_OpenDialog(filterList, configuration.directory.file().getPath(), path);
+			int result = configuration.intent == NativeFileChooserIntent.SAVE ?
+					NativeFileDialog.NFD_SaveDialog(filterList, configuration.directory.file().getPath(), path) :
+					NativeFileDialog.NFD_OpenDialog(filterList, configuration.directory.file().getPath(), path);
 
 			switch (result) {
 				case NativeFileDialog.NFD_OKAY:

@@ -40,6 +40,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 import games.spooky.gdx.nativefilechooser.NativeFileChooserCallback;
 import games.spooky.gdx.nativefilechooser.NativeFileChooserConfiguration;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserIntent;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -53,6 +54,8 @@ public class GdxNativeFileChooserDemo extends ApplicationAdapter {
 	Skin skin;
 
 	Preferences prefs;
+
+	Button saveFileButton;
 
 	final NativeFileChooser fileChooser;
 	FileHandle selectedFile;
@@ -73,10 +76,10 @@ public class GdxNativeFileChooserDemo extends ApplicationAdapter {
 
 		skin = new Skin(Gdx.files.internal("uiskin.json"));
 
-		final Label fileLabel = new Label("" , skin);
+		final Label fileLabel = new Label("Open an audio file first" , skin);
 		fileLabel.setAlignment(Align.center);
 
-		Button openFileButton = new TextButton("Select audio file", skin);
+		Button openFileButton = new TextButton("Open audio file", skin);
 		openFileButton.addListener(new ChangeListener() {
 
 			@Override
@@ -91,10 +94,12 @@ public class GdxNativeFileChooserDemo extends ApplicationAdapter {
 						selectedFile = file;
 
 						if (file == null) {
+							saveFileButton.setDisabled(true);
 							fileLabel.setText("Selected audio file: None");
 						} else {
 							prefs.putString("last", file.parent().file().getAbsolutePath());
 							fileLabel.setText("Selected audio file: " + file.path());
+							saveFileButton.setDisabled(false);
 						}
 					}
 
@@ -107,8 +112,50 @@ public class GdxNativeFileChooserDemo extends ApplicationAdapter {
 					@Override
 					public void onError(Exception exception) {
 						selectedFile = null;
-						fileLabel.setText("Selected audio file: None");
 						exception.printStackTrace();
+						fileLabel.setText(exception.getLocalizedMessage());
+					}
+				});
+			}
+		});
+
+		saveFileButton = new TextButton("Save audio file", skin);
+		saveFileButton.setDisabled(true);
+		saveFileButton.addListener(new ChangeListener() {
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				if (selectedFile == null)
+					return;
+
+				NativeFileChooserConfiguration conf = audioChooserConfiguration();
+				conf.title = "Select destination";
+				conf.intent = NativeFileChooserIntent.SAVE;
+
+				fileChooser.chooseFile(conf, new NativeFileChooserCallback() {
+					@Override
+					public void onFileChosen(FileHandle file) {
+						if (selectedFile == null)
+							return;
+
+						try {
+							selectedFile.copyTo(file);
+						} catch (Exception exception) {
+							onError(exception);
+						}
+
+						if (file != null) {
+							prefs.putString("last", file.parent().file().getAbsolutePath());
+						}
+					}
+
+					@Override
+					public void onCancellation() {
+					}
+
+					@Override
+					public void onError(Exception exception) {
+						exception.printStackTrace();
+						fileLabel.setText(exception.getLocalizedMessage());
 					}
 				});
 			}
@@ -117,9 +164,10 @@ public class GdxNativeFileChooserDemo extends ApplicationAdapter {
 		Table rootTable = new Table(skin);
 		rootTable.setFillParent(true);
 		rootTable.row();
-		rootTable.add(fileLabel).grow().padTop(20f);
+		rootTable.add(fileLabel).grow().padTop(20f).colspan(2);
 		rootTable.row().padBottom(20f).growX();
 		rootTable.add(openFileButton);
+		rootTable.add(saveFileButton);
 
 		stage = new Stage(new ScreenViewport(camera), batch);
 		stage.addActor(rootTable);

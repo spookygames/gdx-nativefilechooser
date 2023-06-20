@@ -31,7 +31,7 @@ import com.badlogic.gdx.files.FileHandle;
  * The {@code NativeFileChooser} interface. Put this one into your core project,
  * let it sink through via the initializer in your platform-specific projects
  * and start rolling!
- * 
+ * <p>
  * Be careful, not every parameter of a {@link NativeFileChooserConfiguration}
  * may be functional for every implementation of {@code NativeFileChooser}.
  * 
@@ -55,14 +55,14 @@ public interface NativeFileChooserCallback {
 
 	/**
 	 * Handle cancellation from the user.
-	 * 
+	 * <p>
 	 * In this case, {@link #onFileChosen(FileHandle)} will not be called.
 	 */
 	void onCancellation();
 
 	/**
 	 * Handle exception throw during file choosing.
-	 * 
+	 * <p>
 	 * On Android you should be prepared to handle:
 	 * <ul>
 	 * <li>

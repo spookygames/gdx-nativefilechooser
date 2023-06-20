@@ -90,6 +90,11 @@ public class AndroidFileChooser implements NativeFileChooser {
 		NativeFileChooserUtils.checkNotNull(configuration, "configuration");
 		NativeFileChooserUtils.checkNotNull(callback, "callback");
 
+		if (configuration.intent == NativeFileChooserIntent.SAVE) {
+			app.error(getClass().getSimpleName(), "SAVE intent is not supported on Android");
+			return;
+		}
+
 		// Create target Intent for new Activity
 		Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 

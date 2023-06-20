@@ -99,4 +99,13 @@ public class NativeFileChooserConfiguration {
 	 */
 	public FilenameFilter nameFilter;
 
+	/**
+	 * The intent behind the file chooser.
+	 * <p>
+	 * Use {@link NativeFileChooserIntent#OPEN} (default value) to open an existing file.
+	 * Use {@link NativeFileChooserIntent#SAVE} to save a file.
+	 *
+	 */
+	public NativeFileChooserIntent intent;
+
 }

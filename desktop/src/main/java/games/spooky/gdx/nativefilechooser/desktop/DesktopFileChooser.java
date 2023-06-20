@@ -33,10 +33,7 @@ import java.util.regex.Pattern;
 
 import com.badlogic.gdx.files.FileHandle;
 
-import games.spooky.gdx.nativefilechooser.NativeFileChooser;
-import games.spooky.gdx.nativefilechooser.NativeFileChooserCallback;
-import games.spooky.gdx.nativefilechooser.NativeFileChooserConfiguration;
-import games.spooky.gdx.nativefilechooser.NativeFileChooserUtils;
+import games.spooky.gdx.nativefilechooser.*;
 
 /**
  * Implementation of a {@link NativeFileChooser} for the Desktop backend of a
@@ -72,10 +69,10 @@ public class DesktopFileChooser implements NativeFileChooser {
 		NativeFileChooserUtils.checkNotNull(callback, "callback");
 
 		// Create awt Dialog
-		FileDialog fileDialog = configuration.title == null ? new FileDialog((Frame) null)
-				: new FileDialog((Frame) null, configuration.title);
-
-		FilenameFilter filter = null;
+		FileDialog fileDialog = new FileDialog(
+				(Frame) null,
+				configuration.title == null ? "" : configuration.title,
+				configuration.intent == NativeFileChooserIntent.SAVE ? FileDialog.SAVE : FileDialog.LOAD);
 
 		FilenameFilter filter = createFilenameFilter(configuration);
 

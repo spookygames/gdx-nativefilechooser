@@ -1,10 +1,8 @@
 # gdx-nativefilechooser
 
-Choose files with [LibGDX](https://libgdx.badlogicgames.com/). Just like in the title. Natively. Also, asynchronously.
+Choose files with [LibGDX](https://libgdx.badlogicgames.com/), natively.
 
 This library allows you to asynchronously browse files with the _native_ file chooser available on the platform.
-
-**Stuff is asynchronous.**
 
 ## Setup
 
@@ -18,6 +16,8 @@ Add the pretty **bold** parts into your _build.gradle_ file:
         dependencies {
             compile project(":core")
             ...
+            <b>compile "games.spooky.gdx:gdx-nativefilechooser-desktop:2.1.0"</b>
+            or
             <b>compile "games.spooky.gdx:gdx-nativefilechooser-desktop-lwjgl:2.1.0"</b>
         }
     }
@@ -86,7 +86,6 @@ On Android, it gives:
 * Create a (mandatory) `NativeFileChooserConfiguration` object, stuff it with configuration details if you like.
 * Create a (also mandatory) `NativeFileChooserCallback` object ready to react to anything that may happen.
 * Call the `chooseFile` method from your `NativeFileChooser`, giving the two objects above as arguments.
-* Live a fulfilling life.
 
 #### Example - go get me some oggs
 
@@ -125,9 +124,46 @@ On Android, it gives:
         }
     });
 
+#### Example - save the day
+
+    NativeFileChooserConfiguration conf = new NativeFileChooserConfiguration();
+    
+    // Filter out all files which do not have the .save extension
+    conf.nameFilter = new FilenameFilter() {
+        @Override
+        public boolean accept(File dir, String name) {
+            return name.endsWith("save");
+        }
+    };
+
+    // Use this if you wish to start a "Save file" chooser
+    conf.intent = NativeFileChooserIntent.SAVE;
+    
+    // Add a nice title
+    conf.title = "Save game";
+    
+    fileChooser.chooseFile(conf, new NativeFileChooserCallback() {
+        @Override
+        public void onFileChosen(FileHandle file) {
+            // Write data to save file
+        }
+        
+        @Override
+        public void onCancellation() {
+            // Do nothing
+        }
+        
+        @Override
+        public void onError(Exception exception) {
+            // Handle error
+        }
+    });
+
 ## Platform support
 
-- [x] Desktop (awt/swing/lwjgl)
-- [x] Android
-- [ ] iOS
-- [ ] HTML
+|                 | Open file | Save file | Filter MIME | Filter name |
+|-----------------|-----------|-----------|-------------|-------------|
+| Desktop (AWT)   | ✓         | ✓         | ✓           | ✓           |
+| Desktop (Swing) | ✓         | ✓         | ✓           | ✓           |
+| Desktop (LWJGL) | ✓         | ✓         | ✓           | ✓           |
+| Android         | ✓         |           | ✓           |             |

@@ -93,7 +93,9 @@ public class SwingFileChooser implements NativeFileChooser {
 			fileChooser.setCurrentDirectory(configuration.directory.file());
 
 		// Present it to the world
-        if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+
+		int returnState = (configuration.intent == NativeFileChooserIntent.SAVE ? fileChooser.showSaveDialog(null) : fileChooser.showOpenDialog(null));
+        if (returnState == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
 			FileHandle result = new FileHandle(file);
 			callback.onFileChosen(result);
