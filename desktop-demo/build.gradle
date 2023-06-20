@@ -9,6 +9,8 @@ targetCompatibility = 8
 dependencies {
     implementation project(':core-demo')
     implementation project(':desktop')
+    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersionDemo"
+    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersionDemo:natives-desktop"
 }
 
 archivesBaseName = "$libName-${project.name}"
