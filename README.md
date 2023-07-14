@@ -161,9 +161,9 @@ On Android, it gives:
 
 ## Platform support
 
-|                 | Open file | Save file | Filter MIME | Filter name |
-|-----------------|-----------|-----------|-------------|-------------|
-| Desktop (AWT)   | ✓         | ✓         | ✓           | ✓           |
-| Desktop (Swing) | ✓         | ✓         | ✓           | ✓           |
-| Desktop (LWJGL) | ✓         | ✓         | ✓           | ✓           |
-| Android         | ✓         |           | ✓           |             |
+|                 | Minimum libgdx version | Open file | Save file | Filter MIME | Filter name |
+|-----------------|------------------------|-----------|-----------|-------------|-------------|
+| Desktop (AWT)   | 1.8.0                  | ✓         | ✓         | ✓           | ✓           |
+| Desktop (Swing) | 1.8.0                  | ✓         | ✓         | ✓           | ✓           |
+| Desktop (LWJGL) | 1.11.0                 | ✓         | ✓         | ✓           | ✓           |
+| Android         | 1.8.0                  | ✓         |           | ✓           |             |
