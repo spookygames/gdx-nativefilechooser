@@ -1,0 +1,28 @@
+
+apply plugin: 'java'
+
+sourceCompatibility = 8
+targetCompatibility = 8
+
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+dependencies {
+    implementation project(':core-demo')
+    implementation project(':desktop-lwjgl')
+    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersionDemo"
+    implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersionDemo:natives-desktop"
+}
+
+archivesBaseName = "$libName-${project.name}"
+
+jar {
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    dependsOn configurations.runtimeClasspath
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+
+    manifest {
+        attributes 'Main-Class': "games.spooky.gdx.nativefilechooser.demo.GdxNativeFileChooserDemoDesktopLwjgl"
+    }
+}
+
+license.includes(["**/*.java"])
