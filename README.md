@@ -9,6 +9,13 @@ This library allows you to asynchronously browse files with the _native_ file ch
 Add the pretty **bold** parts into your _build.gradle_ file:
 
 <pre>
+
+    allprojects {
+        ext {
+            <b>gdxNativefilechooserVersion = '2.3.0'</b>
+        }
+    }
+
     project(":desktop") {
         
         ...
@@ -16,9 +23,9 @@ Add the pretty **bold** parts into your _build.gradle_ file:
         dependencies {
             compile project(":core")
             ...
-            <b>compile "games.spooky.gdx:gdx-nativefilechooser-desktop:2.2.0"</b>
+            <b>compile "games.spooky.gdx:gdx-nativefilechooser-desktop:$gdxNativefilechooserVersion"</b>
             or
-            <b>compile "games.spooky.gdx:gdx-nativefilechooser-desktop-lwjgl:2.2.0"</b>
+            <b>compile "games.spooky.gdx:gdx-nativefilechooser-desktop-lwjgl:$gdxNativefilechooserVersion"</b>
         }
     }
     
@@ -29,7 +36,7 @@ Add the pretty **bold** parts into your _build.gradle_ file:
         dependencies {
             compile project(":core")
             ...
-            <b>compile "games.spooky.gdx:gdx-nativefilechooser-android:2.2.0"</b>
+            <b>compile "games.spooky.gdx:gdx-nativefilechooser-android:$gdxNativefilechooserVersion"</b>
         }
     }
     
@@ -39,7 +46,7 @@ Add the pretty **bold** parts into your _build.gradle_ file:
         
         dependencies {
             ...
-            <b>compile "games.spooky.gdx:gdx-nativefilechooser:2.2.0"</b>
+            <b>compile "games.spooky.gdx:gdx-nativefilechooser:$gdxNativefilechooserVersion"</b>
         }
     }
 </pre>
