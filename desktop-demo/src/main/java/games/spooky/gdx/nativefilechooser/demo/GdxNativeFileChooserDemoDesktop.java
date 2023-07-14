@@ -23,7 +23,8 @@
  */
 package games.spooky.gdx.nativefilechooser.demo;
 
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import games.spooky.gdx.nativefilechooser.desktop.DesktopFileChooser;
 import games.spooky.gdx.nativefilechooser.desktop.SwingFileChooser;
 
@@ -31,8 +32,15 @@ import java.util.Arrays;
 
 public class GdxNativeFileChooserDemoDesktop {
 	public static void main(String[] args) {
+
 		boolean swing = args != null && Arrays.asList(args).contains("--swing");
+
 		GdxNativeFileChooserDemo demo = new GdxNativeFileChooserDemo(swing ? new SwingFileChooser() : new DesktopFileChooser());
-		new LwjglApplication(demo, "gdx-nativefilechooser demo (desktop)", 1200, 800);
+
+		Lwjgl3ApplicationConfiguration configuration = new Lwjgl3ApplicationConfiguration();
+		configuration.setTitle("gdx-nativefilechooser demo (desktop)");
+		configuration.setWindowedMode(1200, 800);
+
+		new Lwjgl3Application(demo, configuration);
 	}
 }

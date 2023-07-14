@@ -9,7 +9,7 @@ targetCompatibility = 8
 dependencies {
     implementation project(':core-demo')
     implementation project(':desktop')
-    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersionDemo"
+    implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersionDemo"
     implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersionDemo:natives-desktop"
 }
 
