@@ -124,14 +124,13 @@ public class DesktopFileChooser implements NativeFileChooser {
 	private static FilenameFilter createMimeTypeFilter(final String mimeType) {
 		return new FilenameFilter() {
 
-			final Pattern mimePattern = Pattern.compile(mimeType.replaceAll("/", "\\\\/").replace("*", ".*"));
+			final Pattern mimePattern = NativeFileChooserUtils.mimePattern(mimeType);
 
 			@Override
 			public boolean accept(File dir, String name) {
 
 				// Getting a Mime type is not warranted (and may be slow!)
 				try {
-					// Java7
 					String mime = Files.probeContentType(new File(dir, name).toPath());
 
 					if (mime != null) {

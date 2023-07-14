@@ -23,6 +23,8 @@
  */
 package games.spooky.gdx.nativefilechooser;
 
+import java.util.regex.Pattern;
+
 /**
  * Some run-of-the-mill utility methods for {@link NativeFileChooser} implementations.
  * 
@@ -42,5 +44,9 @@ public final class NativeFileChooserUtils {
 	public static void checkNotNull(Object argument, String argumentName) {
 		if (argument == null)
 			throw new NullPointerException("Given argument \"" + argumentName + "\" must not be null");
+	}
+
+	public static Pattern mimePattern(String mimeType) {
+		return Pattern.compile(mimeType.replaceAll("/", "\\\\/").replace("*", ".*"));
 	}
 }

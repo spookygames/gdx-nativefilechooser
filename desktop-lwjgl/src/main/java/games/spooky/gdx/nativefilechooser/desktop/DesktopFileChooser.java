@@ -25,12 +25,17 @@ package games.spooky.gdx.nativefilechooser.desktop;
 
 import com.badlogic.gdx.files.FileHandle;
 import games.spooky.gdx.nativefilechooser.*;
+import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.util.nfd.NativeFileDialog;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.lwjgl.system.MemoryUtil.memAllocPointer;
@@ -39,11 +44,6 @@ import static org.lwjgl.util.nfd.NativeFileDialog.NFD_GetError;
 import static org.lwjgl.util.nfd.NativeFileDialog.nNFD_Free;
 
 public class DesktopFileChooser implements NativeFileChooser {
-
-	static CharSequence createFilterList(final String mimeType) throws MimeTypeException {
-		MimeType type = MimeTypes.getDefaultMimeTypes().forName(mimeType);
-		return type.getExtensions().stream().map(s -> s.substring(1)).collect(Collectors.joining(","));
-	}
 
 	@Override
 	public void chooseFile(NativeFileChooserConfiguration configuration, NativeFileChooserCallback callback) {
@@ -84,6 +84,35 @@ public class DesktopFileChooser implements NativeFileChooser {
 			callback.onError(e);
 		} finally {
 			memFree(path);
+		}
+	}
+
+	static CharSequence createFilterList(final String mimeType) throws MimeTypeException {
+		return findEligibleMimeTypes(mimeType).stream()
+				.flatMap(type -> type.getExtensions().stream().map(s -> s.substring(1)))
+				.distinct()
+				.collect(Collectors.joining(","));
+	}
+
+	static Collection<MimeType> findEligibleMimeTypes(final String mimeType) throws MimeTypeException {
+		MimeTypes allMimeTypes = MimeTypes.getDefaultMimeTypes();
+
+		if (mimeType.contains("*")) {
+			final Pattern mimePattern = NativeFileChooserUtils.mimePattern(mimeType);
+			return allMimeTypes.getMediaTypeRegistry().getTypes().stream()
+					.map(MediaType::toString)
+					.filter(typeName -> mimePattern.matcher(typeName).matches())
+					.map(typeName -> {
+						try {
+							return allMimeTypes.getRegisteredMimeType(typeName);
+						} catch (MimeTypeException e) {
+							return null;
+						}
+					})
+					.filter(Objects::nonNull)
+					.collect(Collectors.toList());
+		} else {
+			return Collections.singletonList(allMimeTypes.forName(mimeType));
 		}
 	}
 }
