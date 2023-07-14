@@ -8,8 +8,6 @@ targetCompatibility = 1.7
 
 dependencies {
     api project(':core')
-    api "com.badlogicgames.gdx:gdx-backend-lwjgl:$gdxVersion"
-    api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
 }
 
 archivesBaseName = "$libName-${project.name}"
