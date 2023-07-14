@@ -17,6 +17,7 @@ dependencies {
     api "org.lwjgl:lwjgl-nfd:${lwjglVersion}:natives-macos"
     api "org.lwjgl:lwjgl-nfd:${lwjglVersion}:natives-macos-arm64"
     api "org.lwjgl:lwjgl-nfd:${lwjglVersion}:natives-windows"
+    api "org.lwjgl:lwjgl-nfd:${lwjglVersion}:natives-windows-arm64"
     api "org.lwjgl:lwjgl-nfd:${lwjglVersion}:natives-windows-x86"
     api "org.apache.tika:tika-core:2.4.1"
 }
