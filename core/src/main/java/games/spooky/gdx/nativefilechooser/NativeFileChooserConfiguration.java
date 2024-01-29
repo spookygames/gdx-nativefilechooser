@@ -84,6 +84,11 @@ public class NativeFileChooserConfiguration {
 	 * satisfies MIME filtering <i>and</i> name filtering.
 	 */
 	public String mimeFilter;
+	/**
+	 * A filter on filetypes. It is made like this: "imageFiles/jpg,png,svg". Multiple filters can be concatenated by a semicolon.
+	 * This is only used on the LWJGL version.
+	 */
+	public String fileTypeFilter;
 
 	/**
 	 * A filter on file name (or more), just like with the regular
