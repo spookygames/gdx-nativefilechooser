@@ -119,6 +119,48 @@ public class GdxNativeFileChooserDemo extends ApplicationAdapter {
 			}
 		});
 
+		Button dirButton = new TextButton("Open dir (LWJGL) - Copies selected file to dir", skin);
+		dirButton.addListener(new ChangeListener() {
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				if (selectedFile == null)
+					return;
+
+				NativeFileChooserConfiguration conf = audioChooserConfiguration();
+				conf.title = "Select destination";
+				conf.intent = NativeFileChooserIntent.FOLDER;
+
+				fileChooser.chooseFile(conf, new NativeFileChooserCallback() {
+					@Override
+					public void onFileChosen(FileHandle file) {
+						if (selectedFile == null)
+							return;
+
+						try {
+							selectedFile.copyTo(file);
+						} catch (Exception exception) {
+							onError(exception);
+						}
+
+						if (file != null) {
+							Gdx.app.log("Folder", file.path());
+							Gdx.app.log("Folder", file.toString());
+
+						}
+					}
+
+					@Override
+					public void onCancellation() {
+					}
+
+					@Override
+					public void onError(Exception exception) {
+						exception.printStackTrace();
+						fileLabel.setText(exception.getLocalizedMessage());
+					}
+				});
+			}
+		});
 		saveFileButton = new TextButton("Save audio file", skin);
 		saveFileButton.setDisabled(true);
 		saveFileButton.addListener(new ChangeListener() {
@@ -168,6 +210,7 @@ public class GdxNativeFileChooserDemo extends ApplicationAdapter {
 		rootTable.row().padBottom(20f).growX();
 		rootTable.add(openFileButton);
 		rootTable.add(saveFileButton);
+		rootTable.add(dirButton);
 
 		stage = new Stage(new ScreenViewport(camera), batch);
 		stage.addActor(rootTable);

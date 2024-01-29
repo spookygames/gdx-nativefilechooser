@@ -83,10 +83,21 @@ public class DesktopFileChooser implements NativeFileChooser {
                         .spec(stack.UTF8(s[1]));
             }
 
-            int result = configuration.intent == NativeFileChooserIntent.SAVE ?
-                    NativeFileDialog.NFD_SaveDialog(path, filterList, configuration.directory.path(), null) :
-                    NativeFileDialog.NFD_OpenDialog(path, filterList, configuration.directory.path());
+            int result = 0;
+            configuration.intent = configuration.intent == null ? NativeFileChooserIntent.OPEN : configuration.intent;
+            switch (configuration.intent) {
 
+                case SAVE:
+                    result = NativeFileDialog.NFD_SaveDialog(path, filterList, configuration.directory.path(), null);
+                    break;
+                case FOLDER:
+                    result = NativeFileDialog.NFD_PickFolder(path, configuration.directory.path());
+                    break;
+
+                case OPEN:
+                    result = NativeFileDialog.NFD_OpenDialog(path, filterList, configuration.directory.path());
+                    break;
+            }
 
             switch (result) {
                 case NativeFileDialog.NFD_OKAY:

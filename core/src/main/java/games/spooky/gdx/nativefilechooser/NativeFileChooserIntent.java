@@ -28,9 +28,11 @@ package games.spooky.gdx.nativefilechooser;
  * <p>
  * Select {@link NativeFileChooserIntent#OPEN} (default value) to open an existing file.
  * Select {@link NativeFileChooserIntent#SAVE} to save a file.
+ * Select {@link NativeFileChooserIntent#FOLDER} to choose a folder (Works only with LWJGL).
  *
  */
 public enum NativeFileChooserIntent {
 	OPEN,
-	SAVE
+	SAVE,
+	FOLDER
 }
