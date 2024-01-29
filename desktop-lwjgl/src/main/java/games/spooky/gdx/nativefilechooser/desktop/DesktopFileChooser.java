@@ -30,6 +30,8 @@ import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
 import org.lwjgl.PointerBuffer;
+import org.lwjgl.system.MemoryStack;
+import org.lwjgl.util.nfd.NFDFilterItem;
 import org.lwjgl.util.nfd.NativeFileDialog;
 
 import java.util.Collection;
@@ -38,57 +40,77 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.memAllocPointer;
 import static org.lwjgl.system.MemoryUtil.memFree;
+import static org.lwjgl.util.nfd.NativeFileDialog.NFD_FreePath;
 import static org.lwjgl.util.nfd.NativeFileDialog.NFD_GetError;
-import static org.lwjgl.util.nfd.NativeFileDialog.nNFD_Free;
 
 public class DesktopFileChooser implements NativeFileChooser {
 
 	@Override
 	public void chooseFile(NativeFileChooserConfiguration configuration, NativeFileChooserCallback callback) {
 
-		NativeFileChooserUtils.checkNotNull(configuration, "configuration");
-		NativeFileChooserUtils.checkNotNull(callback, "callback");
+        NativeFileChooserUtils.checkNotNull(configuration, "configuration");
+        NativeFileChooserUtils.checkNotNull(callback, "callback");
 
-		CharSequence filterList = null;
+        String mimeFilterList = "";
 
-		if (configuration.mimeFilter != null) {
-			try {
-				filterList = createFilterList(configuration.mimeFilter);
-			} catch (MimeTypeException ignored) {
-			}
-		}
+        if (configuration.mimeFilter != null) {
+            try {
+                mimeFilterList = createFilterList(configuration.mimeFilter);
+                System.out.println(mimeFilterList);
+            } catch (MimeTypeException ignored) {
+            }
+        }
 
-		PointerBuffer path = memAllocPointer(1);
+        PointerBuffer path = memAllocPointer(1);
 
-		try {
-			int result = configuration.intent == NativeFileChooserIntent.SAVE ?
-					NativeFileDialog.NFD_SaveDialog(filterList, configuration.directory.file().getPath(), path) :
-					NativeFileDialog.NFD_OpenDialog(filterList, configuration.directory.file().getPath(), path);
+        NFDFilterItem.Buffer filterList = null;
+        try (MemoryStack stack = stackPush()) {
 
-			switch (result) {
-				case NativeFileDialog.NFD_OKAY:
-					FileHandle file = new FileHandle(path.getStringUTF8(0));
-					callback.onFileChosen(file);
-					nNFD_Free(path.get(0));
-					break;
-				case NativeFileDialog.NFD_CANCEL:
-					callback.onCancellation();
-					break;
-				case NativeFileDialog.NFD_ERROR:
-					callback.onError(new Exception(NFD_GetError()));
-					break;
-			}
-		} catch (Exception e) {
-			callback.onError(e);
-		} finally {
-			memFree(path);
-		}
-	}
+            if (configuration.fileTypeFilter != null && !configuration.fileTypeFilter.isEmpty()) {
+                mimeFilterList += configuration.fileTypeFilter;
+            }
 
-	static CharSequence createFilterList(final String mimeType) throws MimeTypeException {
-		return findEligibleMimeTypes(mimeType).stream()
+            String[] filter = mimeFilterList.split(";");
+            filterList = NFDFilterItem.malloc(filter.length);
+            for (int i = 0; i < filter.length; i++) {
+
+                String[] s = filter[i].split("/");
+                filterList.get(i)
+                        .name(stack.UTF8(s[0]))
+                        .spec(stack.UTF8(s[1]));
+            }
+
+            int result = configuration.intent == NativeFileChooserIntent.SAVE ?
+                    NativeFileDialog.NFD_SaveDialog(path, filterList, configuration.directory.path(), null) :
+                    NativeFileDialog.NFD_OpenDialog(path, filterList, configuration.directory.path());
+
+
+            switch (result) {
+                case NativeFileDialog.NFD_OKAY:
+                    FileHandle file = new FileHandle(path.getStringUTF8(0));
+                    callback.onFileChosen(file);
+                    NFD_FreePath(path.get(0));
+                    break;
+                case NativeFileDialog.NFD_CANCEL:
+                    callback.onCancellation();
+                    break;
+                case NativeFileDialog.NFD_ERROR:
+                    callback.onError(new Exception(NFD_GetError()));
+                    break;
+            }
+        } catch (Exception e) {
+            callback.onError(e);
+        } finally {
+            memFree(path);
+            memFree(filterList);
+        }
+    }
+
+	static String createFilterList(final String mimeType) throws MimeTypeException {
+		return mimeType.split("/")[0] + "/" + findEligibleMimeTypes(mimeType).stream()
 				.flatMap(type -> type.getExtensions().stream().map(s -> s.substring(1)))
 				.distinct()
 				.collect(Collectors.joining(","));
