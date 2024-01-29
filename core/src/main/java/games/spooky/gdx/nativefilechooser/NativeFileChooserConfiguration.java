@@ -53,7 +53,9 @@ public class NativeFileChooserConfiguration extends NativeChooserConfiguration {
 	/**
 	 * A filter on MIME data type, under the form of a MIME string, like
 	 * "*&#47;*" or "application/octet-stream" or "text/plain; charset=utf-8".
-	 * 
+	 *
+	 * <p>
+	 * On LWJGL platform, following syntax is also accepted: "images/jpg,png,svg;audio/mp3,ogg".
 	 * <p>
 	 * Warning: MIME filtering on the Desktop platform is experimental and slow
 	 * at best. Use at your own risk.
