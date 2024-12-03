@@ -74,24 +74,28 @@ public class DesktopFileChooser implements NativeFileChooser {
 				configuration.title == null ? "" : configuration.title,
 				configuration.intent == NativeFileChooserIntent.SAVE ? FileDialog.SAVE : FileDialog.LOAD);
 
-		FilenameFilter filter = createFilenameFilter(configuration);
+		try {
+			FilenameFilter filter = createFilenameFilter(configuration);
 
-		if (filter != null)
-			fileDialog.setFilenameFilter(filter);
+			if (filter != null)
+				fileDialog.setFilenameFilter(filter);
 
-		// Set starting path if any
-		if (configuration.directory != null)
-			fileDialog.setDirectory(configuration.directory.file().getAbsolutePath());
+			// Set starting path if any
+			if (configuration.directory != null)
+				fileDialog.setDirectory(configuration.directory.file().getAbsolutePath());
 
-		// Present it to the world
-		fileDialog.setVisible(true);
+			// Present it to the world
+			fileDialog.setVisible(true);
 
-		File[] files = fileDialog.getFiles();
+			File[] files = fileDialog.getFiles();
 
-		if (files == null || files.length == 0) {
-			callback.onCancellation();
-		} else {
-			callback.onFileChosen(new FileHandle(files[0]));
+			if (files == null || files.length == 0) {
+				callback.onCancellation();
+			} else {
+				callback.onFileChosen(new FileHandle(files[0]));
+			}
+		} finally {
+			fileDialog.dispose();
 		}
 
 	}
