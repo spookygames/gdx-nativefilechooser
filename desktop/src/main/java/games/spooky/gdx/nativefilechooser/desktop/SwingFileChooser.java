@@ -24,6 +24,7 @@
 package games.spooky.gdx.nativefilechooser.desktop;
 
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.Array;
 import games.spooky.gdx.nativefilechooser.*;
 
 import javax.swing.*;
@@ -64,9 +65,64 @@ public class SwingFileChooser implements NativeFileChooser {
 		NativeFileChooserUtils.checkNotNull(configuration, "configuration");
 		NativeFileChooserUtils.checkNotNull(callback, "callback");
 
+		JFileChooser fileChooser = createFileChooser(configuration);
+
+		int returnState = (configuration.intent == NativeFileChooserIntent.SAVE ? fileChooser.showSaveDialog(null) : fileChooser.showOpenDialog(null));
+		switch (returnState) {
+			case JFileChooser.APPROVE_OPTION:
+				File file = fileChooser.getSelectedFile();
+				FileHandle result = new FileHandle(file);
+				callback.onFileChosen(result);
+				break;
+			case JFileChooser.CANCEL_OPTION:
+				callback.onCancellation();
+				break;
+			case JFileChooser.ERROR_OPTION:
+			default:
+				callback.onError(new RuntimeException("An error happened while opening Swing file dialog"));
+				break;
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see NativeFileChooser#chooseFiles(NativeFileChooserConfiguration,
+	 * NativeFilesChooserCallback)
+	 */
+	@Override
+	public void chooseFiles(NativeFileChooserConfiguration configuration, NativeFilesChooserCallback callback) {
+		NativeFileChooserUtils.checkNotNull(configuration, "configuration");
+		NativeFileChooserUtils.checkNotNull(callback, "callback");
+
+		JFileChooser fileChooser = createFileChooser(configuration);
+		fileChooser.setMultiSelectionEnabled(true);
+
+		int returnState = (configuration.intent == NativeFileChooserIntent.SAVE ? fileChooser.showSaveDialog(null) : fileChooser.showOpenDialog(null));
+		switch (returnState) {
+			case JFileChooser.APPROVE_OPTION:
+				File[] selectedFiles = fileChooser.getSelectedFiles();
+				Array<FileHandle> result = new Array<>(selectedFiles.length);
+				for (File selectedFile : selectedFiles) {
+					result.add(new FileHandle(selectedFile));
+				}
+				callback.onFilesChosen(result);
+				break;
+			case JFileChooser.CANCEL_OPTION:
+				callback.onCancellation();
+				break;
+			case JFileChooser.ERROR_OPTION:
+			default:
+				callback.onError(new RuntimeException("An error happened while opening Swing file dialog"));
+				break;
+		}
+	}
+
+	private JFileChooser createFileChooser(final NativeFileChooserConfiguration configuration) {
+
 		// Create Swing JFileChooser
 		JFileChooser fileChooser = new JFileChooser();
-		
+
 		String title = configuration.title;
 		if (title != null)
 			fileChooser.setDialogTitle(title);
@@ -79,7 +135,7 @@ public class SwingFileChooser implements NativeFileChooser {
 				@Override public String getDescription() {
 					return "gdx-nativefilechooser custom filter";
 				}
-				
+
 				@Override
 				public boolean accept(File f) {
 					return f.isDirectory() || finalFilter.accept(f.getParentFile(), f.getName());
@@ -92,17 +148,6 @@ public class SwingFileChooser implements NativeFileChooser {
 		if (configuration.directory != null)
 			fileChooser.setCurrentDirectory(configuration.directory.file());
 
-//		fileChooser.setFileSelectionMode();
-
-		// Present it to the world
-
-		int returnState = (configuration.intent == NativeFileChooserIntent.SAVE ? fileChooser.showSaveDialog(null) : fileChooser.showOpenDialog(null));
-        if (returnState == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-			FileHandle result = new FileHandle(file);
-			callback.onFileChosen(result);
-        } else {
-			callback.onCancellation();
-        }
+		return fileChooser;
 	}
 }
