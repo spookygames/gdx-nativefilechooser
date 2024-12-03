@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016-2023 Spooky Games
+ * Copyright (c) 2016-2024 Spooky Games
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -91,6 +91,8 @@ public class SwingFileChooser implements NativeFileChooser {
 		// Set starting path if any
 		if (configuration.directory != null)
 			fileChooser.setCurrentDirectory(configuration.directory.file());
+
+//		fileChooser.setFileSelectionMode();
 
 		// Present it to the world
 
