@@ -25,6 +25,7 @@ package games.spooky.gdx.nativefilechooser.android;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.ClipData;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -32,6 +33,8 @@ import android.provider.MediaStore;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidEventListener;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.Array;
+
 import games.spooky.gdx.nativefilechooser.*;
 
 import java.io.*;
@@ -90,9 +93,79 @@ public class AndroidFileChooser implements NativeFileChooser {
 		NativeFileChooserUtils.checkNotNull(configuration, "configuration");
 		NativeFileChooserUtils.checkNotNull(callback, "callback");
 
+		try {
+
+			Intent intent = createFileSelectionIntent(configuration);
+
+			registerCallbackListener(callback, new IntentConsumer() {
+				@Override
+				public void onData(Intent data) throws IOException {
+					FileHandle file;
+
+					// Get the Uri of the selected file
+					Uri uri = data.getData();
+
+					// Try to build file from it
+					file = fileHandleFromUri(uri);
+
+					// Call success callback
+					callback.onFileChosen(file);
+				}
+			});
+
+			startFileSelection(intent, configuration);
+		} catch (Exception ex) {
+			callback.onError(ex);
+		}
+
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see NativeFileChooser#chooseFiles(NativeFileChooserConfiguration,
+	 * NativeFilesChooserCallback)
+	 */
+	@Override
+	public void chooseFiles(final NativeFileChooserConfiguration configuration, final NativeFilesChooserCallback callback) {
+
+		NativeFileChooserUtils.checkNotNull(configuration, "configuration");
+		NativeFileChooserUtils.checkNotNull(callback, "callback");
+
+		try {
+
+			Intent intent = createFileSelectionIntent(configuration);
+			intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+
+			registerCallbackListener(callback, new IntentConsumer() {
+				@Override
+				public void onData(Intent data) throws IOException {
+					Array<FileHandle> files = new Array<>();
+
+					ClipData clipData = data.getClipData();
+					if (clipData == null) {
+						files.add(fileHandleFromUri(data.getData()));
+					} else {
+						for (int i = 0, n = clipData.getItemCount(); i < n; i++) {
+							files.add(fileHandleFromUri(clipData.getItemAt(i).getUri()));
+						}
+					}
+
+					callback.onFilesChosen(files);
+				}
+			});
+
+			startFileSelection(intent, configuration);
+		} catch (Exception ex) {
+			callback.onError(ex);
+		}
+	}
+
+	private Intent createFileSelectionIntent(final NativeFileChooserConfiguration configuration) {
+
 		if (configuration.intent == NativeFileChooserIntent.SAVE) {
 			app.error(getClass().getSimpleName(), "SAVE intent is not supported on Android");
-			return;
+			throw new IllegalArgumentException("SAVE intent is not supported on Android");
 		}
 
 		// Create target Intent for new Activity
@@ -113,6 +186,7 @@ public class AndroidFileChooser implements NativeFileChooser {
 				data = Uri.parse(configuration.directory.file().toURI().toURL().toString().replaceFirst("file:", "content:"));
 			} catch (MalformedURLException ex) {
 				app.error(getClass().getSimpleName(), "Invalid starting directory", ex);
+				throw new IllegalArgumentException("Invalid starting directory", ex);
 			}
 		}
 
@@ -135,16 +209,22 @@ public class AndroidFileChooser implements NativeFileChooser {
 		if (configuration.nameFilter != null)
 			app.debug(getClass().getSimpleName(), "nameFilter property is not supported on Android");
 
+		return intent;
+	}
+
+	private void registerCallbackListener(final NativeChooserCallback callback, final IntentConsumer onData) {
+
 		// Register a listener to get a callback
 		// It will deregister by itself on first call
 		app.addAndroidEventListener(new AndroidEventListener() {
 			@Override
 			public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
+				// Don't interfere with other activity results
+				if (requestCode != IntentCode)
+					return;
+
 				try {
-					// Don't interfere with other activity results
-					if (requestCode != IntentCode)
-						return;
 
 					switch (resultCode) {
 						case Activity.RESULT_CANCELED:
@@ -152,19 +232,14 @@ public class AndroidFileChooser implements NativeFileChooser {
 							callback.onCancellation();
 							break;
 						case Activity.RESULT_OK:
-							try {
-								FileHandle file;
-
-								// Get the Uri of the selected file
-								Uri uri = data.getData();
-
-								// Try to build file from it
-								file = fileHandleFromUri(uri);
-
-								// Call success callback
-								callback.onFileChosen(file);
-							} catch (IOException ex) {
-								callback.onError(ex);
+							if (data == null) {
+								callback.onCancellation();
+							} else {
+								try {
+									onData.onData(data);
+								} catch (IOException ex) {
+									callback.onError(ex);
+								}
 							}
 							break;
 						default:
@@ -176,16 +251,16 @@ public class AndroidFileChooser implements NativeFileChooser {
 				}
 			}
 		});
+	}
 
-		try {
-			app.startActivityForResult(Intent.createChooser(intent, configuration.title), IntentCode);
-		} catch (ActivityNotFoundException ex) {
-			callback.onError(ex);
-		}
-
+	private void startFileSelection(Intent intent, NativeFileChooserConfiguration configuration) throws ActivityNotFoundException {
+		app.startActivityForResult(Intent.createChooser(intent, configuration.title), IntentCode);
 	}
 
 	private FileHandle fileHandleFromUri(Uri uri) throws IOException {
+		if (uri == null)
+			throw new IOException("No uri data received from intent");
+
 		File f = new File(uri.toString());
 		if (!f.exists()) {
 
@@ -198,6 +273,8 @@ public class AndroidFileChooser implements NativeFileChooser {
 
 			try {
 				input = app.getContentResolver().openInputStream(uri);
+				if (input == null)
+					throw new IOException("Unable to open input stream");
 				output = new FileOutputStream(f);
 
 				copyStream(input, output);
@@ -231,6 +308,10 @@ public class AndroidFileChooser implements NativeFileChooser {
 		byte[] buffer = new byte[2048];
 		for (int n = in.read(buffer); n >= 0; n = in.read(buffer))
 			out.write(buffer, 0, n);
+	}
+
+	private interface IntentConsumer {
+		void onData(Intent data) throws IOException;
 	}
 
 }

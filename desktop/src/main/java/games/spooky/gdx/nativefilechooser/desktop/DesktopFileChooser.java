@@ -23,17 +23,16 @@
  */
 package games.spooky.gdx.nativefilechooser.desktop;
 
-import java.awt.FileDialog;
-import java.awt.Frame;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.Array;
+import games.spooky.gdx.nativefilechooser.*;
+
+import java.awt.*;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.regex.Pattern;
-
-import com.badlogic.gdx.files.FileHandle;
-
-import games.spooky.gdx.nativefilechooser.*;
 
 /**
  * Implementation of a {@link NativeFileChooser} for the Desktop backend of a
@@ -68,6 +67,41 @@ public class DesktopFileChooser implements NativeFileChooser {
 		NativeFileChooserUtils.checkNotNull(configuration, "configuration");
 		NativeFileChooserUtils.checkNotNull(callback, "callback");
 
+		File[] files = openFileDialog(configuration, false);
+
+		if (files == null || files.length == 0) {
+			callback.onCancellation();
+		} else {
+			callback.onFileChosen(new FileHandle(files[0]));
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see NativeFileChooser#chooseFiles(NativeFileChooserConfiguration,
+	 * NativeFilesChooserCallback)
+	 */
+	@Override
+	public void chooseFiles(NativeFileChooserConfiguration configuration, NativeFilesChooserCallback callback) {
+
+		NativeFileChooserUtils.checkNotNull(configuration, "configuration");
+		NativeFileChooserUtils.checkNotNull(callback, "callback");
+
+		File[] selectedFiles = openFileDialog(configuration, true);
+
+		if (selectedFiles == null || selectedFiles.length == 0) {
+			callback.onCancellation();
+		} else {
+			Array<FileHandle> result = new Array<>(selectedFiles.length);
+			for (File selectedFile : selectedFiles) {
+				result.add(new FileHandle(selectedFile));
+			}
+			callback.onFilesChosen(result);
+		}
+	}
+
+	private File[] openFileDialog(final NativeFileChooserConfiguration configuration, boolean multiple) {
 		// Create awt Dialog
 		FileDialog fileDialog = new FileDialog(
 				(Frame) null,
@@ -84,20 +118,14 @@ public class DesktopFileChooser implements NativeFileChooser {
 			if (configuration.directory != null)
 				fileDialog.setDirectory(configuration.directory.file().getAbsolutePath());
 
-			// Present it to the world
+			fileDialog.setMultipleMode(multiple);
+
 			fileDialog.setVisible(true);
 
-			File[] files = fileDialog.getFiles();
-
-			if (files == null || files.length == 0) {
-				callback.onCancellation();
-			} else {
-				callback.onFileChosen(new FileHandle(files[0]));
-			}
+			return fileDialog.getFiles();
 		} finally {
 			fileDialog.dispose();
 		}
-
 	}
 
 	static FilenameFilter createFilenameFilter(final NativeFileChooserConfiguration configuration) {

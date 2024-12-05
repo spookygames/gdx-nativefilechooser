@@ -25,25 +25,39 @@ package games.spooky.gdx.nativefilechooser;
 
 import com.badlogic.gdx.files.FileHandle;
 
+import java.io.IOException;
+
 /**
- * The {@code NativeFileChooser} single-file callback interface.
- * 
- * @see NativeFileChooser#chooseFile(NativeFileChooserConfiguration, NativeFileChooserCallback)
- * 
- * @see NativeFileChooserConfiguration
- * @see NativeFilesChooserCallback
+ * The base {@code NativeFileChooser} callback interface.
  * 
  * @author thorthur
  * 
  */
-public interface NativeFileChooserCallback extends NativeChooserCallback {
+public interface NativeChooserCallback {
 
 	/**
-	 * Handle the user-chosen {@link FileHandle}.
-	 * 
-	 * @param file
-	 *            FileHandle chosen by user
+	 * Handle cancellation from the user.
 	 */
-	void onFileChosen(FileHandle file);
+	void onCancellation();
+
+	/**
+	 * Handle exception thrown during file choosing.
+	 * <p>
+	 * On Android you should be prepared to handle:
+	 * <ul>
+	 * <li>
+	 * {@link IOException} if an error occurred while copying chosen resource to
+	 * a temporary {@link FileHandle}.
+	 * </li>
+	 * <li>
+	 * {@code ActivityNotFoundException} if no file manager could be found on
+	 * the device.
+	 * </li>
+	 * </ul>
+	 * 
+	 * @param exception
+	 *            Exception throw during file choosing
+	 */
+	void onError(Exception exception);
 
 }

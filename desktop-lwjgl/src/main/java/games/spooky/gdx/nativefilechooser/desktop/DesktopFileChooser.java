@@ -24,12 +24,14 @@
 package games.spooky.gdx.nativefilechooser.desktop;
 
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.Array;
 import games.spooky.gdx.nativefilechooser.*;
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
 import org.lwjgl.PointerBuffer;
+import org.lwjgl.util.nfd.NFDPathSet;
 import org.lwjgl.util.nfd.NativeFileDialog;
 
 import java.util.Collection;
@@ -40,8 +42,7 @@ import java.util.stream.Collectors;
 
 import static org.lwjgl.system.MemoryUtil.memAllocPointer;
 import static org.lwjgl.system.MemoryUtil.memFree;
-import static org.lwjgl.util.nfd.NativeFileDialog.NFD_GetError;
-import static org.lwjgl.util.nfd.NativeFileDialog.nNFD_Free;
+import static org.lwjgl.util.nfd.NativeFileDialog.*;
 
 public class DesktopFileChooser implements NativeFileChooser {
 
@@ -51,14 +52,7 @@ public class DesktopFileChooser implements NativeFileChooser {
 		NativeFileChooserUtils.checkNotNull(configuration, "configuration");
 		NativeFileChooserUtils.checkNotNull(callback, "callback");
 
-		CharSequence filterList = null;
-
-		if (configuration.mimeFilter != null) {
-			try {
-				filterList = createFilterList(configuration.mimeFilter);
-			} catch (MimeTypeException ignored) {
-			}
-		}
+		CharSequence filterList = configuration.mimeFilter == null ? null : createFilterList(configuration.mimeFilter);
 
 		PointerBuffer path = memAllocPointer(1);
 
@@ -87,11 +81,51 @@ public class DesktopFileChooser implements NativeFileChooser {
 		}
 	}
 
-	static CharSequence createFilterList(final String mimeType) throws MimeTypeException {
-		return findEligibleMimeTypes(mimeType).stream()
-				.flatMap(type -> type.getExtensions().stream().map(s -> s.substring(1)))
-				.distinct()
-				.collect(Collectors.joining(","));
+	@Override
+	public void chooseFiles(NativeFileChooserConfiguration configuration, NativeFilesChooserCallback callback) {
+
+		NativeFileChooserUtils.checkNotNull(configuration, "configuration");
+		NativeFileChooserUtils.checkNotNull(callback, "callback");
+
+		CharSequence filterList = configuration.mimeFilter == null ? null : createFilterList(configuration.mimeFilter);
+
+		NFDPathSet paths = NFDPathSet.create();
+
+		try {
+			int result = NativeFileDialog.NFD_OpenDialogMultiple(filterList, configuration.directory.file().getPath(), paths);
+
+			switch (result) {
+				case NativeFileDialog.NFD_OKAY:
+					int count = (int) NFD_PathSet_GetCount(paths);
+					Array<FileHandle> files = new Array<>(count);
+					for (int i = 0; i < count; i++) {
+						files.add(new FileHandle(Objects.requireNonNull(NFD_PathSet_GetPath(paths, i))));
+					}
+					callback.onFilesChosen(files);
+					break;
+				case NativeFileDialog.NFD_CANCEL:
+					callback.onCancellation();
+					break;
+				case NativeFileDialog.NFD_ERROR:
+					callback.onError(new Exception(NFD_GetError()));
+					break;
+			}
+		} catch (Exception e) {
+			callback.onError(e);
+		} finally {
+			NFD_PathSet_Free(paths);
+		}
+	}
+
+	static CharSequence createFilterList(final String mimeType) {
+		try {
+			return findEligibleMimeTypes(mimeType).stream()
+					.flatMap(type -> type.getExtensions().stream().map(s -> s.substring(1)))
+					.distinct()
+					.collect(Collectors.joining(","));
+		} catch (MimeTypeException ignored) {
+			return null;
+		}
 	}
 
 	static Collection<MimeType> findEligibleMimeTypes(final String mimeType) throws MimeTypeException {

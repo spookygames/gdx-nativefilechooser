@@ -36,16 +36,16 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import games.spooky.gdx.nativefilechooser.NativeFileChooser;
-import games.spooky.gdx.nativefilechooser.NativeFileChooserCallback;
-import games.spooky.gdx.nativefilechooser.NativeFileChooserConfiguration;
-import games.spooky.gdx.nativefilechooser.NativeFileChooserIntent;
+import games.spooky.gdx.nativefilechooser.*;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Locale;
 
+@SuppressWarnings("CallToPrintStackTrace")
 public class GdxNativeFileChooserDemo extends ApplicationAdapter {
 
 	SpriteBatch batch;
@@ -55,10 +55,12 @@ public class GdxNativeFileChooserDemo extends ApplicationAdapter {
 
 	Preferences prefs;
 
+	Label fileLabel;
+	VerticalGroup files;
 	Button saveFileButton;
 
 	final NativeFileChooser fileChooser;
-	FileHandle selectedFile;
+	final ObjectSet<FileHandle> selectedFiles = new ObjectSet<>();
 
 	public GdxNativeFileChooserDemo(NativeFileChooser fileChooser) {
 		super();
@@ -76,8 +78,10 @@ public class GdxNativeFileChooserDemo extends ApplicationAdapter {
 
 		skin = new Skin(Gdx.files.internal("uiskin.json"));
 
-		final Label fileLabel = new Label("Open an audio file first" , skin);
+		fileLabel = new Label("" , skin);
 		fileLabel.setAlignment(Align.center);
+
+		files = new VerticalGroup();
 
 		Button openFileButton = new TextButton("Open audio file", skin);
 		openFileButton.addListener(new ChangeListener() {
@@ -88,34 +92,31 @@ public class GdxNativeFileChooserDemo extends ApplicationAdapter {
 				NativeFileChooserConfiguration conf = audioChooserConfiguration();
 				conf.title = "Select audio file";
 
-				fileChooser.chooseFile(conf, new NativeFileChooserCallback() {
-					@Override
-					public void onFileChosen(FileHandle file) {
-						selectedFile = file;
+				fileChooser.chooseFile(conf, new SelectionCallback());
+			}
+		});
 
-						if (file == null) {
-							saveFileButton.setDisabled(true);
-							fileLabel.setText("Selected audio file: None");
-						} else {
-							prefs.putString("last", file.parent().file().getAbsolutePath());
-							fileLabel.setText("Selected audio file: " + file.path());
-							saveFileButton.setDisabled(false);
-						}
-					}
+		Button openFilesButton = new TextButton("Open audio files", skin);
+		openFilesButton.addListener(new ChangeListener() {
 
-					@Override
-					public void onCancellation() {
-						selectedFile = null;
-						fileLabel.setText("Selected audio file: None");
-					}
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
 
-					@Override
-					public void onError(Exception exception) {
-						selectedFile = null;
-						exception.printStackTrace();
-						fileLabel.setText(exception.getLocalizedMessage());
-					}
-				});
+				NativeFileChooserConfiguration conf = audioChooserConfiguration();
+				conf.title = "Select audio files";
+
+				fileChooser.chooseFiles(conf, new SelectionCallback());
+			}
+		});
+
+		Button clearFilesButton = new TextButton("Clear audio files", skin);
+		clearFilesButton.addListener(new ChangeListener() {
+
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				System.out.println("-- Clear files");
+				selectedFiles.clear();
+				refresh();
 			}
 		});
 
@@ -124,7 +125,7 @@ public class GdxNativeFileChooserDemo extends ApplicationAdapter {
 		saveFileButton.addListener(new ChangeListener() {
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
-				if (selectedFile == null)
+				if (selectedFiles.isEmpty())
 					return;
 
 				NativeFileChooserConfiguration conf = audioChooserConfiguration();
@@ -134,17 +135,20 @@ public class GdxNativeFileChooserDemo extends ApplicationAdapter {
 				fileChooser.chooseFile(conf, new NativeFileChooserCallback() {
 					@Override
 					public void onFileChosen(FileHandle file) {
-						if (selectedFile == null)
+						System.out.println("-- Save first file to: " + file);
+
+						if (selectedFiles.isEmpty())
 							return;
 
 						try {
-							selectedFile.copyTo(file);
+							selectedFiles.first().copyTo(file);
 						} catch (Exception exception) {
 							onError(exception);
 						}
 
 						if (file != null) {
 							prefs.putString("last", file.parent().file().getAbsolutePath());
+							prefs.flush();
 						}
 					}
 
@@ -163,16 +167,23 @@ public class GdxNativeFileChooserDemo extends ApplicationAdapter {
 
 		Table rootTable = new Table(skin);
 		rootTable.setFillParent(true);
-		rootTable.row();
-		rootTable.add(fileLabel).grow().padTop(20f).colspan(2);
-		rootTable.row().padBottom(20f).growX();
+		rootTable.row().padTop(20f);
+		rootTable.add(fileLabel).grow().colspan(2);
+		rootTable.row().padTop(10f);
+		rootTable.add(files).colspan(2);
+		rootTable.row().padTop(20f).growX();
 		rootTable.add(openFileButton);
 		rootTable.add(saveFileButton);
+		rootTable.row().padTop(4f).padBottom(20f).growX();
+		rootTable.add(openFilesButton);
+		rootTable.add(clearFilesButton);
 
 		stage = new Stage(new ScreenViewport(camera), batch);
 		stage.addActor(rootTable);
 
 		Gdx.input.setInputProcessor(stage);
+
+		refresh();
 	}
 
 	@Override
@@ -195,6 +206,16 @@ public class GdxNativeFileChooserDemo extends ApplicationAdapter {
 		batch.dispose();
 		stage.dispose();
 		skin.dispose();
+	}
+
+	private void refresh() {
+		boolean empty = selectedFiles.isEmpty();
+		fileLabel.setText(empty ? "Selected audio file: None. Open a file first" : "Selected audio files: " + selectedFiles.size);
+		saveFileButton.setDisabled(empty);
+		files.clear();
+		for (FileHandle file : selectedFiles) {
+			files.addActor(new Label(file.path(), skin));
+		}
 	}
 
 	private NativeFileChooserConfiguration audioChooserConfiguration() {
@@ -226,6 +247,46 @@ public class GdxNativeFileChooserDemo extends ApplicationAdapter {
 		conf.mimeFilter = "audio/*";
 
 		return conf;
+	}
+
+	private class SelectionCallback implements NativeFileChooserCallback, NativeFilesChooserCallback {
+
+		@Override
+		public void onFilesChosen(Array<FileHandle> files) {
+			System.out.println("-- Files chosen: " + files);
+
+			if (files != null && files.size > 0) {
+				prefs.putString("last", files.first().parent().file().getAbsolutePath());
+				prefs.flush();
+			}
+
+			selectedFiles.addAll(files);
+			refresh();
+		}
+
+		@Override
+		public void onFileChosen(FileHandle file) {
+			System.out.println("-- File chosen: " + file);
+
+			if (file != null) {
+				prefs.putString("last", file.parent().file().getAbsolutePath());
+				prefs.flush();
+			}
+
+			selectedFiles.add(file);
+			refresh();
+		}
+
+		@Override
+		public void onCancellation() {
+			System.out.println("-- Cancelled");
+		}
+
+		@Override
+		public void onError(Exception exception) {
+			exception.printStackTrace();
+			fileLabel.setText(exception.getLocalizedMessage());
+		}
 	}
 
 }
