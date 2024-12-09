@@ -24,26 +24,27 @@
 package games.spooky.gdx.nativefilechooser;
 
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.Array;
 
 /**
- * The {@code NativeFileChooser} single-file callback interface.
+ * The {@code NativeFileChooser} multi-files callback interface.
  * 
- * @see NativeFileChooser#chooseFile(NativeFileChooserConfiguration, NativeFileChooserCallback)
+ * @see NativeFileChooser#chooseFiles(NativeFileChooserConfiguration, NativeFilesChooserCallback)
  * 
  * @see NativeFileChooserConfiguration
- * @see NativeFilesChooserCallback
+ * @see NativeFileChooserCallback
  * 
  * @author thorthur
  * 
  */
-public interface NativeFileChooserCallback extends NativeChooserCallback {
+public interface NativeFilesChooserCallback extends NativeChooserCallback {
 
 	/**
-	 * Handle the user-chosen {@link FileHandle}.
-	 * 
-	 * @param file
-	 *            FileHandle chosen by user
+	 * Handle the user-chosen {@link FileHandle}s.
+	 *
+	 * @param files
+	 *            FileHandle instances chosen by user
 	 */
-	void onFileChosen(FileHandle file);
+	void onFilesChosen(Array<FileHandle> files);
 
 }

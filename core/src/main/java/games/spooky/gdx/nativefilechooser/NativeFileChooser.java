@@ -65,4 +65,27 @@ public interface NativeFileChooser {
 	 */
 	void chooseFile(NativeFileChooserConfiguration configuration, NativeFileChooserCallback callback);
 
+	/**
+	 * Launch a native UI in order to find a file and let you handle the result.
+	 * This operation is asynchronous. All configuration is carried out through
+	 * a non-null {@link NativeFileChooserConfiguration} object. Once the
+	 * asynchronous operation ends (ie. a file is selected, or the operation is
+	 * cancelled, or an error occurs), a proper method on the callback is
+	 * called. See {@link NativeFileChooserCallback} for more.
+	 *
+	 * <p>
+	 * Be careful, not every parameter of a
+	 * {@link NativeFileChooserConfiguration} may be functional for every
+	 * implementation of {@link NativeFileChooser}.
+	 *
+	 * @see NativeFileChooserConfiguration
+	 * @see NativeFileChooserCallback
+	 *
+	 * @param configuration
+	 *            File choosing configuration, must not be null
+	 * @param callback
+	 *            File choosing asynchronous callback, must not be null
+	 */
+	void chooseFiles(NativeFileChooserConfiguration configuration, NativeFilesChooserCallback callback);
+
 }
