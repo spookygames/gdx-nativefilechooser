@@ -33,17 +33,29 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import games.spooky.gdx.nativefilechooser.*;
 
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Locale;
+
+import games.spooky.gdx.nativefilechooser.NativeFileChooser;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserCallback;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserConfiguration;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserIntent;
+import games.spooky.gdx.nativefilechooser.NativeFilesChooserCallback;
+import games.spooky.gdx.nativefilechooser.NativeFolderChooserCallback;
+import games.spooky.gdx.nativefilechooser.NativeFolderChooserConfiguration;
 
 @SuppressWarnings("CallToPrintStackTrace")
 public class GdxNativeFileChooserDemo extends ApplicationAdapter {
@@ -106,6 +118,21 @@ public class GdxNativeFileChooserDemo extends ApplicationAdapter {
 				conf.title = "Select audio files";
 
 				fileChooser.chooseFiles(conf, new SelectionCallback());
+			}
+		});
+
+		Button openFolderButton = new TextButton("Open all in folder (no filter)", skin);
+		openFolderButton.addListener(new ChangeListener() {
+
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+
+				NativeFileChooserConfiguration fileConf = audioChooserConfiguration();
+				NativeFolderChooserConfiguration folderConf = new NativeFolderChooserConfiguration();
+				folderConf.directory = fileConf.directory;
+				folderConf.title = "Select folder";
+
+				fileChooser.chooseFolder(folderConf, new SelectionCallback());
 			}
 		});
 
@@ -174,8 +201,11 @@ public class GdxNativeFileChooserDemo extends ApplicationAdapter {
 		rootTable.row().padTop(20f).growX();
 		rootTable.add(openFileButton);
 		rootTable.add(saveFileButton);
-		rootTable.row().padTop(4f).padBottom(20f).growX();
+		rootTable.row().padTop(4f).growX();
 		rootTable.add(openFilesButton);
+		rootTable.add();
+		rootTable.row().padTop(4f).padBottom(20f).growX();
+		rootTable.add(openFolderButton);
 		rootTable.add(clearFilesButton);
 
 		stage = new Stage(new ScreenViewport(camera), batch);
@@ -249,7 +279,7 @@ public class GdxNativeFileChooserDemo extends ApplicationAdapter {
 		return conf;
 	}
 
-	private class SelectionCallback implements NativeFileChooserCallback, NativeFilesChooserCallback {
+	private class SelectionCallback implements NativeFileChooserCallback, NativeFilesChooserCallback, NativeFolderChooserCallback {
 
 		@Override
 		public void onFilesChosen(Array<FileHandle> files) {
@@ -286,6 +316,19 @@ public class GdxNativeFileChooserDemo extends ApplicationAdapter {
 		public void onError(Exception exception) {
 			exception.printStackTrace();
 			fileLabel.setText(exception.getLocalizedMessage());
+		}
+
+		@Override
+		public void onFolderChosen(FileHandle folder) {
+			System.out.println("-- Folder chosen: " + folder);
+
+			if (folder != null) {
+				prefs.putString("last", folder.path());
+				prefs.flush();
+
+				selectedFiles.addAll(folder.list());
+				refresh();
+			}
 		}
 	}
 

@@ -101,6 +101,21 @@ public class DesktopFileChooser implements NativeFileChooser {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see NativeFileChooser#chooseFolder(NativeFolderChooserConfiguration,
+	 * NativeFolderChooserCallback)
+	 */
+	@Override
+	public void chooseFolder(NativeFolderChooserConfiguration configuration, NativeFolderChooserCallback callback) {
+
+		NativeFileChooserUtils.checkNotNull(configuration, "configuration");
+		NativeFileChooserUtils.checkNotNull(callback, "callback");
+
+		callback.onError(new IllegalArgumentException("Choosing folder is not implemented in AWT DesktopFileChooser"));
+	}
+
 	private File[] openFileDialog(final NativeFileChooserConfiguration configuration, boolean multiple) {
 		// Create awt Dialog
 		FileDialog fileDialog = new FileDialog(

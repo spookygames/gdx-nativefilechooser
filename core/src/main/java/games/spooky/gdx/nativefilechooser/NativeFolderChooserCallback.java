@@ -21,29 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package games.spooky.gdx.nativefilechooser.demo;
+package games.spooky.gdx.nativefilechooser;
 
-import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
+import com.badlogic.gdx.files.FileHandle;
 
-import com.badlogic.gdx.backends.android.AndroidApplication;
-import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
+/**
+ * The {@code NativeFileChooser} folder callback interface.
+ * 
+ * @see NativeFileChooser#chooseFolder(NativeFolderChooserConfiguration, NativeFolderChooserCallback)
+ * 
+ * @see NativeFolderChooserConfiguration
+ * 
+ * @author thorthur
+ * 
+ */
+public interface NativeFolderChooserCallback extends NativeChooserCallback {
 
-import games.spooky.gdx.nativefilechooser.android.AndroidFileChooser;
+	/**
+	 * Handle the user-chosen {@link FileHandle}.
+	 * 
+	 * @param folder
+	 *            FileHandle chosen by user
+	 */
+	void onFolderChosen(FileHandle folder);
 
-public class GdxNativeFileChooserDemoAndroid extends AndroidApplication {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
-        config.useAccelerometer = false;
-        config.useCompass = false;
-        config.useWakelock = true;
-
-        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, 12);
-
-        initialize(new GdxNativeFileChooserDemo(new AndroidFileChooser(this)), config);
-    }
 }

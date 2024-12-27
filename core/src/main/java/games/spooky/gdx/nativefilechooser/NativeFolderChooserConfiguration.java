@@ -21,29 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package games.spooky.gdx.nativefilechooser.demo;
+package games.spooky.gdx.nativefilechooser;
 
-import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
+/**
+ * The configuration class for a call to
+ * {@link NativeFileChooser#chooseFolder(NativeFolderChooserConfiguration, NativeFolderChooserCallback)}
+ * .
+ * 
+ * <p>
+ * Any instance of this is to be considered a plain-old Java object (POJO) and
+ * manipulated at will, code in this very library will never modify the content
+ * of such instance.
+ * 
+ * <p>
+ * Be careful, not every parameter of a {@code NativeFileChooserConfiguration}
+ * may be functional for every implementation of {@link NativeFileChooser}.
+ * Consult parameters individually for more details.
+ * 
+ * @see NativeFileChooser#chooseFolder(NativeFolderChooserConfiguration, NativeFolderChooserCallback)
+ * 
+ * @see NativeFileChooser
+ * @see NativeFileChooserCallback
+ * 
+ * @author thorthur
+ * 
+ */
+public class NativeFolderChooserConfiguration extends NativeChooserConfiguration {
 
-import com.badlogic.gdx.backends.android.AndroidApplication;
-import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
-
-import games.spooky.gdx.nativefilechooser.android.AndroidFileChooser;
-
-public class GdxNativeFileChooserDemoAndroid extends AndroidApplication {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
-        config.useAccelerometer = false;
-        config.useCompass = false;
-        config.useWakelock = true;
-
-        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, 12);
-
-        initialize(new GdxNativeFileChooserDemo(new AndroidFileChooser(this)), config);
-    }
 }

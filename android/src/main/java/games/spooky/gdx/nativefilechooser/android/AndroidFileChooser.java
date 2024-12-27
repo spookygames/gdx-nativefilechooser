@@ -26,19 +26,39 @@ package games.spooky.gdx.nativefilechooser.android;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidEventListener;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 
-import games.spooky.gdx.nativefilechooser.*;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
+import java.util.List;
+
+import games.spooky.gdx.nativefilechooser.NativeChooserCallback;
+import games.spooky.gdx.nativefilechooser.NativeChooserConfiguration;
+import games.spooky.gdx.nativefilechooser.NativeFileChooser;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserCallback;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserConfiguration;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserIntent;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserUtils;
+import games.spooky.gdx.nativefilechooser.NativeFilesChooserCallback;
+import games.spooky.gdx.nativefilechooser.NativeFolderChooserCallback;
+import games.spooky.gdx.nativefilechooser.NativeFolderChooserConfiguration;
 
 import static android.content.Intent.normalizeMimeType;
 
@@ -113,7 +133,7 @@ public class AndroidFileChooser implements NativeFileChooser {
 				}
 			});
 
-			startFileSelection(intent, configuration);
+			startSelection(intent, configuration);
 		} catch (Exception ex) {
 			callback.onError(ex);
 		}
@@ -155,10 +175,73 @@ public class AndroidFileChooser implements NativeFileChooser {
 				}
 			});
 
-			startFileSelection(intent, configuration);
+			startSelection(intent, configuration);
 		} catch (Exception ex) {
 			callback.onError(ex);
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see NativeFileChooser#chooseFolder(NativeFolderChooserConfiguration,
+	 * NativeFolderChooserCallback)
+	 */
+	@Override
+	public void chooseFolder(final NativeFolderChooserConfiguration configuration, final NativeFolderChooserCallback callback) {
+
+		NativeFileChooserUtils.checkNotNull(configuration, "configuration");
+		NativeFileChooserUtils.checkNotNull(callback, "callback");
+
+		try {
+
+			Intent intent = createFolderSelectionIntent(configuration);
+
+			registerCallbackListener(callback, new IntentConsumer() {
+				@Override
+				public void onData(Intent data) throws IOException {
+					// Get the Uri of the selected file
+					Uri uri = data.getData();
+
+					// Try to build folder from it
+					FileHandle folder = folderHandleFromUri(uri);
+
+					// Call success callback
+					callback.onFolderChosen(folder);
+				}
+			});
+
+			startSelection(intent, configuration);
+		} catch (Exception ex) {
+			callback.onError(ex);
+		}
+
+	}
+
+	private Intent createFolderSelectionIntent(final NativeFolderChooserConfiguration configuration) {
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+			throw new IllegalStateException("Choosing folder is not supported on Android SDK < 21");
+		}
+
+		// Create target Intent for new Activity
+		Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+
+		intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+
+		// Handle starting path, if any
+        if (configuration.directory != null) {
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+				throw new IllegalStateException("Setting initial directory while choosing folder is not supported on Android SDK < 26");
+			}
+			try {
+				intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, configuration.directory.file().toURI().toURL().toString().replaceFirst("file:", "content:"));
+			} catch (MalformedURLException ex) {
+				app.error(getClass().getSimpleName(), "Invalid starting directory", ex);
+				throw new IllegalArgumentException("Invalid starting directory", ex);
+			}
+		}
+
+        return intent;
 	}
 
 	private Intent createFileSelectionIntent(final NativeFileChooserConfiguration configuration) {
@@ -253,9 +336,42 @@ public class AndroidFileChooser implements NativeFileChooser {
 		});
 	}
 
-	private void startFileSelection(Intent intent, NativeFileChooserConfiguration configuration) throws ActivityNotFoundException {
+	private void startSelection(Intent intent, NativeChooserConfiguration configuration) throws ActivityNotFoundException {
 		app.startActivityForResult(Intent.createChooser(intent, configuration.title), IntentCode);
 	}
+
+	private FileHandle folderHandleFromUri(Uri uri) throws IOException {
+		if (uri == null)
+			throw new IOException("No uri data received from intent");
+		return Gdx.files.absolute(folderUriToPath(uri));
+	}
+
+	private String folderUriToPath(Uri uri) {
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+			throw new IllegalStateException("Choosing folder is not supported on Android SDK < 21");
+		}
+
+		if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
+			if ("com.android.externalstorage.documents".equals(uri.getAuthority())) {
+				final List<String> segments = uri.getPathSegments();
+				final String docId = segments.get(segments.size() - 1);
+				final String[] split = docId.split(":");
+				final String type = split[0];
+
+				if ("primary".equalsIgnoreCase(type)) {
+					if (split.length > 1) {
+						return Environment.getExternalStorageDirectory() + "/" + split[1] + "/";
+					} else {
+						return Environment.getExternalStorageDirectory() + "/";
+					}
+				} else {
+					return "storage/" + docId.replace(":", "/");
+				}
+
+			}
+        }
+        return uri.getPath();
+    }
 
 	private FileHandle fileHandleFromUri(Uri uri) throws IOException {
 		if (uri == null)

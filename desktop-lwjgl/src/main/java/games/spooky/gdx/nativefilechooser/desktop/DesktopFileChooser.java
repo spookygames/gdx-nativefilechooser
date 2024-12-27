@@ -25,7 +25,7 @@ package games.spooky.gdx.nativefilechooser.desktop;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
-import games.spooky.gdx.nativefilechooser.*;
+
 import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
@@ -40,9 +40,22 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import games.spooky.gdx.nativefilechooser.NativeFileChooser;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserCallback;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserConfiguration;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserIntent;
+import games.spooky.gdx.nativefilechooser.NativeFileChooserUtils;
+import games.spooky.gdx.nativefilechooser.NativeFilesChooserCallback;
+import games.spooky.gdx.nativefilechooser.NativeFolderChooserCallback;
+import games.spooky.gdx.nativefilechooser.NativeFolderChooserConfiguration;
+
 import static org.lwjgl.system.MemoryUtil.memAllocPointer;
 import static org.lwjgl.system.MemoryUtil.memFree;
-import static org.lwjgl.util.nfd.NativeFileDialog.*;
+import static org.lwjgl.util.nfd.NativeFileDialog.NFD_GetError;
+import static org.lwjgl.util.nfd.NativeFileDialog.NFD_PathSet_Free;
+import static org.lwjgl.util.nfd.NativeFileDialog.NFD_PathSet_GetCount;
+import static org.lwjgl.util.nfd.NativeFileDialog.NFD_PathSet_GetPath;
+import static org.lwjgl.util.nfd.NativeFileDialog.nNFD_Free;
 
 public class DesktopFileChooser implements NativeFileChooser {
 
@@ -114,6 +127,37 @@ public class DesktopFileChooser implements NativeFileChooser {
 			callback.onError(e);
 		} finally {
 			NFD_PathSet_Free(paths);
+		}
+	}
+
+	@Override
+	public void chooseFolder(NativeFolderChooserConfiguration configuration, NativeFolderChooserCallback callback) {
+
+		NativeFileChooserUtils.checkNotNull(configuration, "configuration");
+		NativeFileChooserUtils.checkNotNull(callback, "callback");
+
+		PointerBuffer path = memAllocPointer(1);
+
+		try {
+			int result = NativeFileDialog.NFD_PickFolder(configuration.directory.path(), path);
+
+			switch (result) {
+				case NativeFileDialog.NFD_OKAY:
+					FileHandle file = new FileHandle(path.getStringUTF8(0));
+					callback.onFolderChosen(file);
+					nNFD_Free(path.get(0));
+					break;
+				case NativeFileDialog.NFD_CANCEL:
+					callback.onCancellation();
+					break;
+				case NativeFileDialog.NFD_ERROR:
+					callback.onError(new Exception(NFD_GetError()));
+					break;
+			}
+		} catch (Exception e) {
+			callback.onError(e);
+		} finally {
+			memFree(path);
 		}
 	}
 
