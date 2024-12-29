@@ -25,8 +25,6 @@ package games.spooky.gdx.nativefilechooser;
 
 import java.io.FilenameFilter;
 
-import com.badlogic.gdx.files.FileHandle;
-
 /**
  * The configuration class for a call to
  * {@link NativeFileChooser#chooseFile(NativeFileChooserConfiguration, NativeFileChooserCallback)}
@@ -50,25 +48,7 @@ import com.badlogic.gdx.files.FileHandle;
  * @author thorthur
  * 
  */
-public class NativeFileChooserConfiguration {
-
-	/**
-	 * Starting directory for the native file chooser launched.
-	 * 
-	 * <p>
-	 * Behavior is defined only if the {@link FileHandle} instance here is a
-	 * directory. Result from any other use is thus undefined but should not do
-	 * much harm anyway.
-	 */
-	public FileHandle directory;
-
-	/**
-	 * Title of the native UI for file choosing.
-	 * 
-	 * <p>
-	 * If null, expect native behavior for undefined title.
-	 */
-	public String title;
+public class NativeFileChooserConfiguration extends NativeChooserConfiguration {
 
 	/**
 	 * A filter on MIME data type, under the form of a MIME string, like

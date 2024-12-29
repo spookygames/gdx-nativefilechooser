@@ -66,12 +66,12 @@ public interface NativeFileChooser {
 	void chooseFile(NativeFileChooserConfiguration configuration, NativeFileChooserCallback callback);
 
 	/**
-	 * Launch a native UI in order to find a file and let you handle the result.
+	 * Launch a native UI in order to find multiple files and let you handle the results.
 	 * This operation is asynchronous. All configuration is carried out through
 	 * a non-null {@link NativeFileChooserConfiguration} object. Once the
-	 * asynchronous operation ends (ie. a file is selected, or the operation is
+	 * asynchronous operation ends (ie. files are selected, or the operation is
 	 * cancelled, or an error occurs), a proper method on the callback is
-	 * called. See {@link NativeFileChooserCallback} for more.
+	 * called. See {@link NativeFilesChooserCallback} for more.
 	 *
 	 * <p>
 	 * Be careful, not every parameter of a
@@ -79,13 +79,36 @@ public interface NativeFileChooser {
 	 * implementation of {@link NativeFileChooser}.
 	 *
 	 * @see NativeFileChooserConfiguration
-	 * @see NativeFileChooserCallback
+	 * @see NativeFilesChooserCallback
 	 *
 	 * @param configuration
 	 *            File choosing configuration, must not be null
 	 * @param callback
-	 *            File choosing asynchronous callback, must not be null
+	 *            Files choosing asynchronous callback, must not be null
 	 */
 	void chooseFiles(NativeFileChooserConfiguration configuration, NativeFilesChooserCallback callback);
+
+	/**
+	 * Launch a native UI in order to find a folder and let you handle the result.
+	 * This operation is asynchronous. All configuration is carried out through
+	 * a non-null {@link NativeFolderChooserConfiguration} object. Once the
+	 * asynchronous operation ends (ie. a folder is selected, or the operation is
+	 * cancelled, or an error occurs), a proper method on the callback is
+	 * called. See {@link NativeFolderChooserCallback} for more.
+	 *
+	 * <p>
+	 * Be careful, not every parameter of a
+	 * {@link NativeFolderChooserConfiguration} may be functional for every
+	 * implementation of {@link NativeFileChooser}.
+	 *
+	 * @see NativeFolderChooserConfiguration
+	 * @see NativeFolderChooserCallback
+	 *
+	 * @param configuration
+	 *            Folder choosing configuration, must not be null
+	 * @param callback
+	 *            Folder choosing asynchronous callback, must not be null
+	 */
+	void chooseFolder(NativeFolderChooserConfiguration configuration, NativeFolderChooserCallback callback);
 
 }

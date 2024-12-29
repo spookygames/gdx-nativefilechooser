@@ -17,6 +17,7 @@ dependencies {
     implementation project(':core-demo')
     implementation project(':android')
     implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersionDemo"
+    implementation 'com.android.support:support-v4:28.0.0'
 
     natives "com.badlogicgames.gdx:gdx-platform:$gdxVersionDemo:natives-armeabi-v7a"
     natives "com.badlogicgames.gdx:gdx-platform:$gdxVersionDemo:natives-arm64-v8a"

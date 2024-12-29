@@ -118,14 +118,34 @@ public class SwingFileChooser implements NativeFileChooser {
 		}
 	}
 
+	@Override
+	public void chooseFolder(NativeFolderChooserConfiguration configuration, NativeFolderChooserCallback callback) {
+
+		NativeFileChooserUtils.checkNotNull(configuration, "configuration");
+		NativeFileChooserUtils.checkNotNull(callback, "callback");
+
+		JFileChooser folderChooser = createFolderChooser(configuration);
+
+		int returnState = folderChooser.showOpenDialog(null);
+		switch (returnState) {
+			case JFileChooser.APPROVE_OPTION:
+				File file = folderChooser.getSelectedFile();
+				FileHandle result = new FileHandle(file);
+				callback.onFolderChosen(result);
+				break;
+			case JFileChooser.CANCEL_OPTION:
+				callback.onCancellation();
+				break;
+			case JFileChooser.ERROR_OPTION:
+			default:
+				callback.onError(new RuntimeException("An error happened while opening Swing file dialog"));
+				break;
+		}
+	}
+
 	private JFileChooser createFileChooser(final NativeFileChooserConfiguration configuration) {
 
-		// Create Swing JFileChooser
-		JFileChooser fileChooser = new JFileChooser();
-
-		String title = configuration.title;
-		if (title != null)
-			fileChooser.setDialogTitle(title);
+		JFileChooser fileChooser = createBasicChooser(configuration);
 
 		FilenameFilter filter = DesktopFileChooser.createFilenameFilter(configuration);
 
@@ -143,6 +163,24 @@ public class SwingFileChooser implements NativeFileChooser {
 			});
 			fileChooser.setAcceptAllFileFilterUsed(false);
 		}
+
+		return fileChooser;
+	}
+
+	private JFileChooser createFolderChooser(final NativeFolderChooserConfiguration configuration) {
+		JFileChooser fileChooser = createBasicChooser(configuration);
+		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		return fileChooser;
+	}
+
+	private JFileChooser createBasicChooser(final NativeChooserConfiguration configuration) {
+
+		// Create Swing JFileChooser
+		JFileChooser fileChooser = new JFileChooser();
+
+		String title = configuration.title;
+		if (title != null)
+			fileChooser.setDialogTitle(title);
 
 		// Set starting path if any
 		if (configuration.directory != null)

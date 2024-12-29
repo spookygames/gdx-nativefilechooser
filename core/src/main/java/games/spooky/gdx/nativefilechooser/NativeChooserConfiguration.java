@@ -21,29 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package games.spooky.gdx.nativefilechooser.demo;
+package games.spooky.gdx.nativefilechooser;
 
-import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
+import com.badlogic.gdx.files.FileHandle;
 
-import com.badlogic.gdx.backends.android.AndroidApplication;
-import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
+import java.io.FilenameFilter;
 
-import games.spooky.gdx.nativefilechooser.android.AndroidFileChooser;
+/**
+ * The base {@code NativeFileChooser} configuration class.
+ * 
+ * @author thorthur
+ * 
+ */
+public abstract class NativeChooserConfiguration {
 
-public class GdxNativeFileChooserDemoAndroid extends AndroidApplication {
+	/**
+	 * Starting directory for the native file chooser.
+	 * 
+	 * <p>
+	 * Behavior is defined only if the {@link FileHandle} instance here is a
+	 * directory. Result from any other use is thus undefined but should not do
+	 * much harm anyway.
+	 */
+	public FileHandle directory;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+	/**
+	 * Title of the native UI for file choosing.
+	 * 
+	 * <p>
+	 * If null, expect native behavior for undefined title.
+	 */
+	public String title;
 
-        AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
-        config.useAccelerometer = false;
-        config.useCompass = false;
-        config.useWakelock = true;
-
-        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, 12);
-
-        initialize(new GdxNativeFileChooserDemo(new AndroidFileChooser(this)), config);
-    }
 }
