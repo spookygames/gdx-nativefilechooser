@@ -12,7 +12,7 @@ Add the pretty **bold** parts into your _build.gradle_ file:
 
     allprojects {
         ext {
-            <b>gdxNativefilechooserVersion = '2.3.0'</b>
+            <b>gdxNativefilechooserVersion = '2.4.0'</b>
         }
     }
 
