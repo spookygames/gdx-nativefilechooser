@@ -94,7 +94,7 @@ On Android, it gives:
 * Create a (also mandatory) `NativeFileChooserCallback` object ready to react to anything that may happen.
 * Call the `chooseFile` method from your `NativeFileChooser`, giving the two objects above as arguments.
 
-#### Example - go get me some oggs
+#### Example - go get me some ogg
 
     // Configure
     NativeFileChooserConfiguration conf = new NativeFileChooserConfiguration();
@@ -168,9 +168,9 @@ On Android, it gives:
 
 ## Platform support
 
-|                 | Minimum libgdx version | Open file | Save file | Filter MIME | Filter name |
-|-----------------|------------------------|-----------|-----------|-------------|-------------|
-| Desktop (AWT)   | 1.8.0                  | ✓         | ✓         | ✓           | ✓           |
-| Desktop (Swing) | 1.8.0                  | ✓         | ✓         | ✓           | ✓           |
-| Desktop (LWJGL) | 1.11.0                 | ✓         | ✓         | ✓           |             |
-| Android         | 1.8.0                  | ✓         |           | ✓           |             |
+|                 | Minimum libgdx version | Open file(s) | Save file | Open folder | Filter MIME | Filter name |
+|-----------------|------------------------|--------------|-----------|-------------|-------------|-------------|
+| Desktop (AWT)   | 1.8.0                  | ✓            | ✓         |             | ✓           | ✓           |
+| Desktop (Swing) | 1.8.0                  | ✓            | ✓         | ✓           | ✓           | ✓           |
+| Desktop (LWJGL) | 1.11.0                 | ✓            | ✓         | ✓           | ✓           |             |
+| Android         | 1.8.0                  | ✓            |           | ✓           | ✓           |             |
